@@ -194,10 +194,10 @@
                 this.changeLocale(locale);
             },
             register: function () {
-                location.href = '/register'
+                this.$router.push({name: 'register'});
             },
             login: function () {
-                location.href = '/login'
+                this.$router.push({name: 'login'});
             },
             initProgressBar() {
                 this.$router.beforeEach((to: any, from: any, next: any) => {

@@ -49,6 +49,7 @@
 </template>
 
 <script lang="ts">
+    import {mapGetters} from 'vuex';
     import {registerModule} from '@/app/store';
     import {addNotification, INotification} from '@components/VueNotificationStack/utils';
     import {IPreLoad} from '@/server/isomorphic';
@@ -93,6 +94,9 @@
             };
         },
         computed: {
+            ...mapGetters('app', ['cookieConsentVersion', 'getLocale']),
+            ...mapGetters('auth', ['isAuthenticated']),
+
             breadCrumbItems() {
                 return [
                     {label: this.$t('common.home' /* Home */), href: '/'},
@@ -126,53 +130,59 @@
 
                 this.isLoading = true;
 
-                axios.post('http://localhost:8081/users/login', formData, {
+                axios.get(`http://localhost:8081/users/login`, {
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*',
-                        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"
+                        'Authorization': `Basic ${btoa(formData.email + ":" + formData.password)}`
                     }
 
 
 
-                // state.token = btoa(credentials.username + ":" + credentials.password);
-                // return axios.get(BACKEND_DASHBOARD_URL, {
-                //     headers: {
-                //         'Authorization': `Basic ${store.getters.token}`
-                //     }
-                // });
+                    // state.token = btoa(credentials.username + ":" + credentials.password);
+                    // return axios.get(BACKEND_DASHBOARD_URL, {
+                    //     headers: {
+                    //         'Authorization': `Basic ${store.getters.token}`
+                    //     }
+                    // });
 
-				// import axios from 'axios';
-                // import Vue from "vue";
-                // import Vuex from "vuex";
-				//
-                // Vue.use(Vuex)
-				//
-                // const BACKEND_DASHBOARD_URL = 'http://localhost:8081/SimpleLibrarySpring/dashboard';
-				//
-                // export const store = new Vuex.Store({
-                //     state: {
-                //         username: '',
-                //         token: '',
-                //         refresh: ''
-                //     },
-                //     mutations: {
-                //         forceRefresh(state) {
-                //             state.refresh = new Date();
-                //         },
-                //         refreshCredentialsFromCookies(state) {
-                //             state.username = Vue.$cookies.get("username");
-                //             state.token = Vue.$cookies.get("toke
+                    // import axios from 'axios';
+                    // import Vue from "vue";
+                    // import Vuex from "vuex";
+                    //
+                    // Vue.use(Vuex)
+                    //
+                    // const BACKEND_DASHBOARD_URL = 'http://localhost:8081/SimpleLibrarySpring/dashboard';
+                    //
+                    // export const store = new Vuex.Store({
+                    //     state: {
+                    //         username: '',
+                    //         token: '',
+                    //         refresh: ''
+                    //     },
+                    //     mutations: {
+                    //         forceRefresh(state) {
+                    //             state.refresh = new Date();
+                    //         },
+                    //         refreshCredentialsFromCookies(state) {
+                    //             state.username = Vue.$cookies.get("username");
+                    //             state.token = Vue.$cookies.get("toke
 
 
+					//   customer@example.com
 
-                }).then(response => {
+                }).then(() => {
                     setTimeout(() => {
                         this.isLoading = false;
                         addNotification({
                             title: 'Login successful!',
                             text: '',
                         } as INotification);
+
+
+                        console.log(AuthGetters);
+                        console.log(mapGetters('auth', ['isAuthenticated']),);
+
+
+                        this.$router.push({name: 'panel'});
                     }, 1000);
                 }).catch(error => {
                     setTimeout(() => {
