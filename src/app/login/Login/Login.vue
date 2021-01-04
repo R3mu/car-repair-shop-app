@@ -49,7 +49,7 @@
 </template>
 
 <script lang="ts">
-    import {mapGetters} from 'vuex';
+	import Vue from 'vue';
     import {registerModule} from '@/app/store';
     import {addNotification, INotification} from '@components/VueNotificationStack/utils';
     import {IPreLoad} from '@/server/isomorphic';
@@ -63,7 +63,10 @@
     import VueCheckbox from '@components/VueCheckbox/VueCheckbox.vue';
     import VueHeadline from '@/app/shared/components/VueHeadline/VueHeadline.vue';
     import {LoginModule} from '../module';
-    import axios from 'axios'
+    import axios from 'axios';
+    import VueCookies from 'vue-cookies'
+
+    Vue.use(VueCookies);
 
     export default {
         $_veeValidate: {
@@ -94,9 +97,6 @@
             };
         },
         computed: {
-            ...mapGetters('app', ['cookieConsentVersion', 'getLocale']),
-            ...mapGetters('auth', ['isAuthenticated']),
-
             breadCrumbItems() {
                 return [
                     {label: this.$t('common.home' /* Home */), href: '/'},
@@ -134,41 +134,6 @@
                     headers: {
                         'Authorization': `Basic ${btoa(formData.email + ":" + formData.password)}`
                     }
-
-
-
-                    // state.token = btoa(credentials.username + ":" + credentials.password);
-                    // return axios.get(BACKEND_DASHBOARD_URL, {
-                    //     headers: {
-                    //         'Authorization': `Basic ${store.getters.token}`
-                    //     }
-                    // });
-
-                    // import axios from 'axios';
-                    // import Vue from "vue";
-                    // import Vuex from "vuex";
-                    //
-                    // Vue.use(Vuex)
-                    //
-                    // const BACKEND_DASHBOARD_URL = 'http://localhost:8081/SimpleLibrarySpring/dashboard';
-                    //
-                    // export const store = new Vuex.Store({
-                    //     state: {
-                    //         username: '',
-                    //         token: '',
-                    //         refresh: ''
-                    //     },
-                    //     mutations: {
-                    //         forceRefresh(state) {
-                    //             state.refresh = new Date();
-                    //         },
-                    //         refreshCredentialsFromCookies(state) {
-                    //             state.username = Vue.$cookies.get("username");
-                    //             state.token = Vue.$cookies.get("toke
-
-
-					//   customer@example.com
-
                 }).then(() => {
                     setTimeout(() => {
                         this.isLoading = false;
@@ -177,11 +142,7 @@
                             text: '',
                         } as INotification);
 
-
-                        console.log(AuthGetters);
-                        console.log(mapGetters('auth', ['isAuthenticated']),);
-
-
+                        this.$cookies.set("authorizationKey", btoa(formData.email + ":" + formData.password), "1d");
                         this.$router.push({name: 'panel'});
                     }, 1000);
                 }).catch(error => {
@@ -201,19 +162,10 @@
         prefetch: (options: IPreLoad) => {
             registerModule('login', LoginModule);
 
-            /**
-             * This is the function where you can load all the data that is needed
-             * to render the page on the server and client side
-             *
-             * This function always returns a promise that means, if you want to
-             * call a vuex action you have to return it, here is an example
-             *
-             * return options.store.dispatch('fetchLogin', '1');
-             *
-             * If you need to fetch data from multiple source your can also return
-             * a Promise chain or a Promise.all()
-             */
             return Promise.resolve();
+        },
+        beforeMount() {
+
         },
     };
 </script>

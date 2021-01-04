@@ -1,79 +1,93 @@
 <template>
-  <div :class="$style.panel">
-    <vue-grid>
-      <vue-breadcrumb :items="breadCrumbItems"></vue-breadcrumb>
+	<div :class="$style.panel">
+		<vue-grid>
+			<vue-breadcrumb :items="breadCrumbItems"></vue-breadcrumb>
 
-      <vue-grid-row>
-        <vue-grid-item fill>
-          <vue-headline level="1">Panel</vue-headline>
-        </vue-grid-item>
-      </vue-grid-row>
-    </vue-grid>
-  </div>
+			<vue-grid-row>
+				<vue-grid-item fill>
+					<vue-headline level="1">Panel</vue-headline>
+				</vue-grid-item>
+			</vue-grid-row>
+		</vue-grid>
+	</div>
 </template>
 
 <script lang="ts">
-import { registerModule } from '@/app/store';
-import { IPreLoad } from '@/server/isomorphic';
-import VueGrid from '@/app/shared/components/VueGrid/VueGrid.vue';
-import VueBreadcrumb from '@components/VueBreadcrumb/VueBreadcrumb.vue';
-import VueGridRow from '@/app/shared/components/VueGridRow/VueGridRow.vue';
-import VueGridItem from '@/app/shared/components/VueGridItem/VueGridItem.vue';
-import VueButton from '@/app/shared/components/VueButton/VueButton.vue';
-import VueHeadline from '@/app/shared/components/VueHeadline/VueHeadline.vue';
+    import Vue from 'vue';
+    import {registerModule} from '@/app/store';
+    import {IPreLoad} from '@/server/isomorphic';
+    import VueGrid from '@/app/shared/components/VueGrid/VueGrid.vue';
+    import VueBreadcrumb from '@components/VueBreadcrumb/VueBreadcrumb.vue';
+    import VueGridRow from '@/app/shared/components/VueGridRow/VueGridRow.vue';
+    import VueGridItem from '@/app/shared/components/VueGridItem/VueGridItem.vue';
+    import VueButton from '@/app/shared/components/VueButton/VueButton.vue';
+    import VueHeadline from '@/app/shared/components/VueHeadline/VueHeadline.vue';
+    import {PanelModule} from '../module';
+    import {addNotification, INotification} from '@components/VueNotificationStack/utils';
+    import axios from 'axios';
+    import VueCookies from 'vue-cookies'
+    import {router} from "@/app/router";
 
-import { PanelModule } from '../module';
+    Vue.use(VueCookies);
 
-export default {
-  metaInfo:   {
-    title: 'Panel',
-  },
-  components: {
-    VueGrid,
-    VueBreadcrumb,
-    VueGridRow,
-    VueGridItem,
-    VueButton,
-    VueHeadline,
-  },
-  data: (): any => ({}),
-  methods: {},
-  computed: {
-    breadCrumbItems() {
-      return [
-        { label: this.$t('common.home' /* Home */), href: '/' },
-        { label: this.$t('common.Panel' /* Panel */), href: '/panel' },
-      ];
-    },
-  },
-  beforeCreate() {
-    registerModule('panel', PanelModule);
-  },
-  prefetch: (options: IPreLoad) => {
-    registerModule('panel', PanelModule);
+    export default {
+        metaInfo: {
+            title: 'Panel',
+        },
+        components: {
+            VueGrid,
+            VueBreadcrumb,
+            VueGridRow,
+            VueGridItem,
+            VueButton,
+            VueHeadline,
+        },
+        data: (): any => ({}),
+        methods: {
+            loaded: () => {
+                axios.get(`http://localhost:8081/users/login`, {
+                    headers: {
+                        'Authorization': `Basic ${Vue.$cookies.get('authorizationKey')}`
+                    }
+                }).then(() => {
 
-    /**
-     * This is the function where you can load all the data that is needed
-     * to render the page on the server and client side
-     *
-     * This function always returns a promise that means, if you want to
-     * call a vuex action you have to return it, here is an example
-     *
-     * return options.store.dispatch('fetchPanel', '1');
-     *
-     * If you need to fetch data from multiple source your can also return
-     * a Promise chain or a Promise.all()
-     */
-    return Promise.resolve();
-  },
-};
+                }).catch(function () {
+                    addNotification({
+                        title: 'You\'re not logged!',
+                        text: 'Please Log in to access this panel',
+                    } as INotification);
+
+                    router.replace('/');
+                });
+            }
+        },
+        computed: {
+            breadCrumbItems() {
+                return [
+                    {label: this.$t('common.home' /* Home */), href: '/'},
+                    {label: this.$t('common.Panel' /* Panel */), href: '/panel'},
+                ];
+            },
+        },
+        beforeCreate() {
+            registerModule('panel', PanelModule);
+        },
+        beforeMount() {
+            this.loaded()
+        },
+        prefetch: (options: IPreLoad) => {
+            registerModule('panel', PanelModule);
+
+            return Promise.resolve();
+        },
+    };
 </script>
 
 <style lang="scss" module>
-@import "~@/app/shared/design-system";
+	@import "~@/app/shared/design-system";
 
-.panel {
-  margin-top: $nav-bar-height;
-  min-height: 500px;
-}
+	.panel {
+		margin-top: $nav-bar-height;
+		min-height: 500px;
+	}
 </style>

@@ -5,20 +5,15 @@
 		<vue-navigation-progress :is-navigating="isNavigating"/>
 
 		<vue-nav-bar>
-
-			<vue-button v-if="isAuthenticated === false" slot="right" color="primary" @click="register">
+			<vue-button class="register" slot="right" color="primary" @click="register">
 				Register
 			</vue-button>
 
-			<vue-button v-if="isAuthenticated === false" slot="right" color="primary" @click="login">
+			<vue-button class="login" slot="right" color="primary" @click="login">
 				Login
 			</vue-button>
 
-			<!--      <vue-button slot="right" v-if="isAuthenticated === false" color="primary" @click="showLoginModal = true">-->
-			<!--        Login-->
-			<!--      </vue-button>-->
-
-			<vue-button slot="right" v-if="isAuthenticated" color="primary" @click="onLogout">
+			<vue-button class="logout" slot="right" color="primary" @click="onLogout">
 				Logout
 			</vue-button>
 		</vue-nav-bar>
@@ -45,8 +40,13 @@
 
 			<vue-sidebar-group title="Navigation">
 				<vue-sidebar-group-item to="/">
-					<vue-icon-code/>
+					<vue-icon-hashtag/>
 					Home
+				</vue-sidebar-group-item>
+
+				<vue-sidebar-group-item :to="{ name: 'panel' }">
+					<vue-icon-hashtag/>
+					Panel
 				</vue-sidebar-group-item>
 
 				<vue-sidebar-group-item :to="{ name: 'counter' }">
@@ -111,10 +111,6 @@
 				</vue-sidebar-group-item>
 			</vue-sidebar-group>
 		</vue-sidebar>
-
-		<vue-modal :show="showLoginModal" @close="showLoginModal = false">
-			<login-form :loading="isLoginPending" @submit="onLoginSubmit"/>
-		</vue-modal>
 	</div>
 </template>
 
@@ -143,6 +139,10 @@
     import VueModal from '@components/VueModal/VueModal.vue';
     import LoginForm from '@shared/modules/auth/LoginForm/LoginForm.vue';
     import {addNotification} from '@components/VueNotificationStack/utils';
+    import Vue from 'vue';
+    import VueCookies from 'vue-cookies'
+
+    Vue.use(VueCookies);
 
     export default {
         name: 'App',
@@ -208,20 +208,6 @@
                     this.isNavigating = false;
                 });
             },
-            async onLoginSubmit(formData: any) {
-                this.isLoginPending = true;
-
-                try {
-                    await this.createToken(formData);
-
-                    this.$router.push({name: 'dashboard'});
-                } catch (e) {
-                    addNotification({title: 'Error during login', text: 'Please try again!'});
-                }
-
-                this.isLoginPending = false;
-                this.showLoginModal = false;
-            },
             async onLogout() {
                 this.isLoginPending = true;
 
@@ -229,12 +215,26 @@
 
                 this.$router.push('/');
 
+                this.$cookies.remove("authorizationKey");
+
                 this.isLoginPending = false;
                 this.showLoginModal = false;
+
+                this.$el.querySelector('.login').style.display = "block";
+                this.$el.querySelector('.register').style.display = "block";
+                this.$el.querySelector('.logout').style.display = "none";
             },
         },
         created() {
             this.initProgressBar();
+        },
+        beforeMount() {
+            if (Vue.$cookies.get('authorizationKey')) {
+                this.$el.querySelector('.login').style.display = "none";
+                this.$el.querySelector('.register').style.display = "none";
+            } else {
+                this.$el.querySelector('.logout').style.display = "none";
+            }
         },
     };
 </script>

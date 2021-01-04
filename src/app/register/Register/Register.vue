@@ -209,19 +209,10 @@
         prefetch: (options: IPreLoad) => {
             registerModule('register', RegisterModule);
 
-            /**
-             * This is the function where you can load all the data that is needed
-             * to render the page on the server and client side
-             *
-             * This function always returns a promise that means, if you want to
-             * call a vuex action you have to return it, here is an example
-             *
-             * return options.store.dispatch('fetchRegister', '1');
-             *
-             * If you need to fetch data from multiple source your can also return
-             * a Promise chain or a Promise.all()
-             */
             return Promise.resolve();
+        },
+        beforeMount() {
+
         },
     };
 </script>
