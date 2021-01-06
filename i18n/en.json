@@ -11,6 +11,7 @@
   "common.password": "Password",
   "common.Panel": "Panel",
   "common.PanelEditTicket": "Ticket Editor",
+  "common.PanelAddTicket": "Add ticket",
   "common.password.placeholder": "Enter any password",
   "common.username": "Username",
   "common.username.placeholder": "Enter any username",

@@ -6,6 +6,7 @@ import { IRegisterState } from './register/state';
 import { IDashboardState } from './dashboard/state';
 import { IPanelState } from './panel/state';
 import { IPanelEditTicketState } from './panelEditTicket/state';
+import { IPanelAddTicketState } from './panelAddTicket/state';
 
 export interface IState {
   [key: string]: any;
@@ -18,6 +19,7 @@ export interface IState {
   dashboard?: IDashboardState;
   panel?: IPanelState;
   panelEditTicket?: IPanelEditTicketState;
+  panelAddTicket?: IPanelAddTicketState;
 }
 
 export const DefaultState: IState = {
