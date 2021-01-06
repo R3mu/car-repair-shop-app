@@ -1,14 +1,12 @@
 <template>
-	<div :class="$style.panel">
+	<div :class="$style.user">
 		<vue-grid>
 			<vue-breadcrumb :items="breadCrumbItems"></vue-breadcrumb>
 
 			<vue-grid-row>
 				<vue-grid-item fill>
-					<vue-headline level="1">Panel</vue-headline>
+					<vue-headline level="1">User</vue-headline>
 
-					<br>
-					<vue-headline level="4">Options:</vue-headline>
 					<div v-html="add"></div>
 
 				</vue-grid-item>
@@ -39,7 +37,7 @@
     import VueGridItem from '@/app/shared/components/VueGridItem/VueGridItem.vue';
     import VueButton from '@/app/shared/components/VueButton/VueButton.vue';
     import VueHeadline from '@/app/shared/components/VueHeadline/VueHeadline.vue';
-    import {PanelModule} from '../module';
+    import {UserModule} from '../module';
     import {addNotification, INotification} from '@components/VueNotificationStack/utils';
     import axios from 'axios';
     import VueCookies from 'vue-cookies'
@@ -49,7 +47,7 @@
 
     export default {
         metaInfo: {
-            title: 'Panel',
+            title: 'User',
         },
         components: {
             VueGrid,
@@ -75,17 +73,23 @@
             }).then(response => {
                 let accountType = response.data.role
 
-                axios.get(`http://localhost:8081/tickets?page=0&size=999`, {
+                axios.get(`http://localhost:8081//users`, {
                     headers: {
                         'Authorization': `Basic ${Vue.$cookies.get('authorizationKey')}`
                     }
                 }).then(response => {
+
+
+                    console.log(response);
+
+
                     let data = response.data.content,
                         row = ``;
 
                     if (accountType == 'EMPLOYEE' || accountType == 'HEAD') {
-                        this.add = `<br><hr><br><a href="/panel-add-ticket">Add new ticket</a><br><br><hr>`
+                        this.add = `<br><p><strong>Options:</strong></p><br><hr><br><a href="/panel-add-ticket">Add new ticket</a><br><br><hr>`
                     }
+
 
                     if (accountType == 'CUSTOMER') {
                         this.client =
@@ -135,14 +139,18 @@
 								<td>${date[1]}.${date[2]}.${date[0]}</td>
 								<td>${value.attachedItems}</td>
 								<td>${value.status.replaceAll('_', ' ')}</td>
-								${(accountType == 'EMPLOYEE' || accountType == 'HEAD') ? `<td><a href="http://localhost:3000/panel-edit-ticket?${value.uuid}">Edit</a></td>` : ''}
+								${(accountType == 'EMPLOYEE' || accountType == 'HEAD') ? `<td><a href="http://localhost:3000/user-edit-ticket?${value.uuid}">Edit</a></td>` : ''}
 							</tr>`
 
                     })
 
                     this.tbody = row
 
-                }).catch(function () {
+                }).catch((error) => {
+
+
+                    console.log(error);
+
 
                     addNotification({
                         title: 'Something is wrong!',
@@ -153,7 +161,7 @@
             }).catch(function () {
                 addNotification({
                     title: 'You\'re not logged!',
-                    text: 'Please Log in to access this panel',
+                    text: 'Please Log in to access this user',
                 } as INotification);
 
                 router.replace('/');
@@ -164,18 +172,18 @@
             breadCrumbItems() {
                 return [
                     {label: this.$t('common.home' /* Home */), href: '/'},
-                    {label: this.$t('common.Panel' /* Panel */), href: '/panel'},
+                    {label: this.$t('common.User' /* User */), href: '/user'},
                 ];
             },
         },
         beforeCreate() {
-            registerModule('panel', PanelModule);
+            registerModule('user', UserModule);
         },
         beforeMount() {
 
         },
         prefetch: (options: IPreLoad) => {
-            registerModule('panel', PanelModule);
+            registerModule('user', UserModule);
 
             return Promise.resolve();
         },
@@ -185,7 +193,7 @@
 <style lang="scss" module>
 	@import "~@/app/shared/design-system";
 
-	.panel {
+	.user {
 		margin-top: $nav-bar-height;
 		min-height: 500px;
 

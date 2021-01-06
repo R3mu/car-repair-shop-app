@@ -46,12 +46,12 @@
 
 				<vue-sidebar-group-item :to="{ name: 'panel' }">
 					<vue-icon-hashtag/>
-					Panel
+					Tickets panel
 				</vue-sidebar-group-item>
 
-				<vue-sidebar-group-item :to="{ name: 'counter' }">
+				<vue-sidebar-group-item :to="{ name: 'user' }">
 					<vue-icon-hashtag/>
-					VueX Example
+					Users panel
 				</vue-sidebar-group-item>
 
 				<vue-sidebar-group-item :to="{ name: 'form' }">

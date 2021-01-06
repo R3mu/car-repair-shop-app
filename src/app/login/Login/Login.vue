@@ -150,7 +150,7 @@
                         this.isLoading = false;
                         addNotification({
                             title: 'ERROR!',
-                            text: error,
+                            text: 'Sprawdź poprawność podanych danych',
                         } as INotification);
                     }, 1000);
                 });
