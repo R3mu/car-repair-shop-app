@@ -39,7 +39,7 @@
 						</vue-grid-row>
 
 						<br/>
-						<vue-button color="primary" :disabled="isSubmitDisabled" :loading="isLoading"> Save</vue-button>
+						<vue-button color="primary" :disabled="isSubmitDisabled" :loading="isLoading">LOGIN</vue-button>
 					</form>
 				</vue-grid-item>
 			</vue-grid-row>

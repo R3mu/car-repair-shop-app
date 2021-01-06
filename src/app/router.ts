@@ -11,6 +11,7 @@ import { LoginRoutes } from './login/routes';
 import { RegisterRoutes } from './register/routes';
 import { DashboardRoutes } from './dashboard/routes';
 import { PanelRoutes } from './panel/routes';
+import { PanelEditTicketRoutes } from './panelEditTicket/routes';
 
 Vue.use(VueRouter);
 Vue.use(Meta);
@@ -18,7 +19,7 @@ Vue.use(Meta);
 export const router: VueRouter = new VueRouter({
   mode: 'history',
   base: __dirname,
-  routes: [...AppRoutes, ...HomeRoutes, ...CounterRoutes, ...FormRoutes, ...DashboardRoutes, ...LoginRoutes, ...RegisterRoutes, ...DashboardRoutes, ...PanelRoutes],
+  routes: [...AppRoutes, ...HomeRoutes, ...CounterRoutes, ...FormRoutes, ...DashboardRoutes, ...LoginRoutes, ...RegisterRoutes, ...DashboardRoutes, ...PanelRoutes, ...PanelEditTicketRoutes],
   scrollBehavior(to: Route, from: Route, savedPosition: { x: number; y: number }) {
     if (to.hash) {
       return { selector: to.hash };

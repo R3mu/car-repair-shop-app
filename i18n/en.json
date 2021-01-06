@@ -10,6 +10,7 @@
   "common.ok": "Ok",
   "common.password": "Password",
   "common.Panel": "Panel",
+  "common.PanelEditTicket": "Ticket Editor",
   "common.password.placeholder": "Enter any password",
   "common.username": "Username",
   "common.username.placeholder": "Enter any username",
