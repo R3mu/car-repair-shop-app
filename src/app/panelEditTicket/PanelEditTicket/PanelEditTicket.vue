@@ -191,31 +191,72 @@
 						</vue-grid-row>
 						<vue-grid-row>
 							<vue-grid-item>
-								<p>
-									<small>Status:</small>
-									CREATED, IN_PROGRESS, CANCELLED, BLOCKED, READY_TO_PICK_UP, RELEASED
-								</p>
+								<small style="font-size: 75%; font-weight: 400; color: #3d8beb;">Status:</small>
+
 								<br>
 							</vue-grid-item>
 						</vue-grid-row>
 						<vue-grid-row>
 							<vue-grid-item>
-								<vue-input
-										name="status"
-										id="status"
-										required
-										type="input"
-										:placeholder="$t('progress_status')"
-										validation="required"
-										v-model="form.status"
-										:error-message="$t('components.formExample.status.error')"
+								<vue-checkbox
+										name="CREATED"
+										id="CREATED"
+										label="CREATED"
+										:checked="form.status === 'CREATED'"
+										@click="form.status = 'CREATED'"
+										radio
+								/>
+								<vue-checkbox
+										style="margin-left: 30px;"
+										name="IN_PROGRESS"
+										id="IN_PROGRESS"
+										label="IN PROGRESS"
+										:checked="form.status === 'IN_PROGRESS'"
+										@click="form.status = 'IN_PROGRESS'"
+										radio
+								/>
+								<vue-checkbox
+										style="margin-left: 30px;"
+										name="CANCELLED"
+										id="CANCELLED"
+										label="CANCELLED"
+										:checked="form.status === 'CANCELLED'"
+										@click="form.status = 'CANCELLED'"
+										radio
+								/>
+								<vue-checkbox
+										style="margin-left: 30px;"
+										name="BLOCKED"
+										id="BLOCKED"
+										label="BLOCKED"
+										:checked="form.status === 'BLOCKED'"
+										@click="form.status = 'BLOCKED'"
+										radio
+								/>
+								<vue-checkbox
+										style="margin-left: 30px;"
+										name="READY_TO_PICK_UP"
+										id="READY_TO_PICK_UP"
+										label="READY TO PICK UP"
+										:checked="form.status === 'READY_TO_PICK_UP'"
+										@click="form.status = 'READY_TO_PICK_UP'"
+										radio
+								/>
+								<vue-checkbox
+										style="margin-left: 30px;"
+										name="RELEASED"
+										id="RELEASED"
+										label="RELEASED"
+										:checked="form.status === 'RELEASED'"
+										@click="form.status = 'RELEASED'"
+										radio
 								/>
 							</vue-grid-item>
 						</vue-grid-row>
 
-						<br/>
+						<br/><br/>
 						<vue-button color="primary" :disabled="isSubmitDisabled" :loading="isLoading">Save</vue-button>
-						<br/><br/><br/>
+						<br/><br/><br/><br/>
 					</form>
 				</vue-grid-item>
 			</vue-grid-row>
@@ -380,6 +421,8 @@
                     });
 
 
+                } else {
+                    router.replace('/');
                 }
 
             }).catch(function () {

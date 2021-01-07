@@ -73,7 +73,7 @@
             }).then(response => {
                 let accountType = response.data.role
 
-                axios.get(`http://localhost:8081//users`, {
+                axios.get(`http://localhost:8081/users`, {
                     headers: {
                         'Authorization': `Basic ${Vue.$cookies.get('authorizationKey')}`
                     }

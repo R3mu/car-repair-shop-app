@@ -299,6 +299,11 @@
                     'Authorization': `Basic ${Vue.$cookies.get('authorizationKey')}`
                 }
             }).then(response => {
+                let accountType = response.data.role
+
+                if (accountType == 'CUSTOMER') {
+                    router.replace('/');
+                }
 
             }).catch(function () {
                 addNotification({

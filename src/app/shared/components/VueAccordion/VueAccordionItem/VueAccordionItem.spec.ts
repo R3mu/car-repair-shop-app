@@ -1,60 +1,60 @@
-import { createLocalVue, mount } from '@vue/test-utils';
+import {createLocalVue, mount} from '@vue/test-utils';
 import VueAccordionItem from './VueAccordionItem.vue';
 
 const localVue = createLocalVue();
 
 describe('VueAccordionItem.vue', () => {
-  test('renders component', () => {
-    const wrapper = mount<any>(VueAccordionItem, {
-      localVue,
-      propsData: {
-        title: 'foo',
-      },
-      provide: {
-        register: jest.fn(),
-        openItem: jest.fn(),
-      },
+    test('renders component', () => {
+        const wrapper = mount<any>(VueAccordionItem, {
+            localVue,
+            propsData: {
+                title: 'foo',
+            },
+            provide: {
+                register: jest.fn(),
+                openItem: jest.fn(),
+            },
+        });
+
+        expect(wrapper.find(`.header`).text()).toMatch('foo');
     });
 
-    expect(wrapper.find(`.header`).text()).toMatch('foo');
-  });
+    test('opens component', async () => {
+        const wrapper = mount<any>(VueAccordionItem, {
+            localVue,
+            propsData: {
+                title: 'foo',
+                initOpen: false,
+            },
+            provide: {
+                register: jest.fn(),
+                openItem: jest.fn(),
+            },
+        });
 
-  test('opens component', async () => {
-    const wrapper = mount<any>(VueAccordionItem, {
-      localVue,
-      propsData: {
-        title: 'foo',
-        initOpen: false,
-      },
-      provide: {
-        register: jest.fn(),
-        openItem: jest.fn(),
-      },
+        await wrapper.setData({idx: 0, open: true});
+
+        expect(wrapper.findAll(`.open`)).toHaveLength(1);
     });
 
-    await wrapper.setData({ idx: 0, open: true });
+    test('calls register', () => {
+        const register = jest.fn();
+        const openItem = jest.fn();
+        const wrapper = mount<any>(VueAccordionItem, {
+            localVue,
+            propsData: {
+                title: 'foo',
+                initOpen: false,
+            },
+            provide: {
+                register,
+                openItem,
+            },
+        });
 
-    expect(wrapper.findAll(`.open`)).toHaveLength(1);
-  });
+        wrapper.vm.click();
 
-  test('calls register', () => {
-    const register = jest.fn();
-    const openItem = jest.fn();
-    const wrapper = mount<any>(VueAccordionItem, {
-      localVue,
-      propsData: {
-        title: 'foo',
-        initOpen: false,
-      },
-      provide: {
-        register,
-        openItem,
-      },
+        expect(openItem).toHaveBeenCalled();
+        expect(register).toHaveBeenCalled();
     });
-
-    wrapper.vm.click();
-
-    expect(openItem).toHaveBeenCalled();
-    expect(register).toHaveBeenCalled();
-  });
 });

@@ -1,63 +1,63 @@
-import { createLocalVue, mount } from '@vue/test-utils';
+import {createLocalVue, mount} from '@vue/test-utils';
 import VueSidebar from './VueSidebar.vue';
 
 const localVue = createLocalVue();
 
 describe('VueSidebar.vue', () => {
-  test('renders component', () => {
-    const wrapper = mount<any>(VueSidebar, {
-      localVue,
-      slots: {
-        default: 'foo',
-      },
+    test('renders component', () => {
+        const wrapper = mount<any>(VueSidebar, {
+            localVue,
+            slots: {
+                default: 'foo',
+            },
+        });
+
+        expect(wrapper.text()).toBe('foo');
     });
 
-    expect(wrapper.text()).toBe('foo');
-  });
+    test('should open', async () => {
+        const wrapper = mount<any>(VueSidebar, {
+            localVue,
+            slots: {
+                default: 'foo',
+            },
+        });
 
-  test('should open', async () => {
-    const wrapper = mount<any>(VueSidebar, {
-      localVue,
-      slots: {
-        default: 'foo',
-      },
+        await wrapper.find('button').trigger('click');
+
+        expect(wrapper.findAll('.open')).toHaveLength(2);
     });
 
-    await wrapper.find('button').trigger('click');
+    test('adds and removes scroll/click/touchstart listeners', () => {
+        document.addEventListener = jest.fn();
+        document.removeEventListener = jest.fn();
 
-    expect(wrapper.findAll('.open')).toHaveLength(2);
-  });
+        const wrapper = mount<any>(VueSidebar, {
+            localVue,
+            stubs: ['router-link'],
+        });
 
-  test('adds and removes scroll/click/touchstart listeners', () => {
-    document.addEventListener = jest.fn();
-    document.removeEventListener = jest.fn();
+        wrapper.destroy();
 
-    const wrapper = mount<any>(VueSidebar, {
-      localVue,
-      stubs: ['router-link'],
+        expect(document.addEventListener).toHaveBeenCalledTimes(2);
+        expect(document.removeEventListener).toHaveBeenCalledTimes(2);
     });
 
-    wrapper.destroy();
+    test('should open menu and close it on outside click', async () => {
+        const wrapper = mount<any>(VueSidebar, {
+            localVue,
+            stubs: ['router-link'],
+        });
 
-    expect(document.addEventListener).toHaveBeenCalledTimes(2);
-    expect(document.removeEventListener).toHaveBeenCalledTimes(2);
-  });
+        expect(wrapper.vm.open).toBeFalsy();
 
-  test('should open menu and close it on outside click', async () => {
-    const wrapper = mount<any>(VueSidebar, {
-      localVue,
-      stubs: ['router-link'],
+        await wrapper.find(`.hamburger`).trigger('click');
+        expect(wrapper.vm.open).toBeTruthy();
+
+        wrapper.vm.handleDocumentClick({target: wrapper.find(`.hamburger`).element});
+        expect(wrapper.vm.open).toBeTruthy();
+
+        wrapper.vm.handleDocumentClick({target: null});
+        expect(wrapper.vm.open).toBeFalsy();
     });
-
-    expect(wrapper.vm.open).toBeFalsy();
-
-    await wrapper.find(`.hamburger`).trigger('click');
-    expect(wrapper.vm.open).toBeTruthy();
-
-    wrapper.vm.handleDocumentClick({ target: wrapper.find(`.hamburger`).element });
-    expect(wrapper.vm.open).toBeTruthy();
-
-    wrapper.vm.handleDocumentClick({ target: null });
-    expect(wrapper.vm.open).toBeFalsy();
-  });
 });

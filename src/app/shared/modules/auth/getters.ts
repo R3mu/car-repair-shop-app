@@ -1,11 +1,11 @@
-import { IAuthState } from './state';
+import {IAuthState} from './state';
 
 export interface IAuthGetters {
-  isAuthenticated(state: IAuthState): boolean;
+    isAuthenticated(state: IAuthState): boolean;
 }
 
 export const AuthGetters: IAuthGetters = {
-  isAuthenticated(state: IAuthState): boolean {
-    return state.accessToken !== null;
-  },
+    isAuthenticated(state: IAuthState): boolean {
+        return state.accessToken !== null;
+    },
 };

@@ -1,21 +1,21 @@
-import { storiesOf } from '@storybook/vue';
-import { action } from '@storybook/addon-actions';
-import { withInfo } from 'storybook-addon-vue-info';
+import {storiesOf} from '@storybook/vue';
+import {action} from '@storybook/addon-actions';
+import {withInfo} from 'storybook-addon-vue-info';
 import VueButton from './VueButton.vue';
-import { brandVariations } from '@components/utils';
+import {brandVariations} from '@components/utils';
 
 const story = storiesOf('Atoms|Button', module) as any;
 
 story.add(
-  'Button Variants',
-  withInfo({})(() => ({
-    components: { VueButton },
-    data(): any {
-      return {
-        variations: brandVariations,
-      };
-    },
-    template: `<div>
+    'Button Variants',
+    withInfo({})(() => ({
+        components: {VueButton},
+        data(): any {
+            return {
+                variations: brandVariations,
+            };
+        },
+        template: `<div>
 <template v-for="variation in variations">
 <vue-button @click="action" :color="variation">{{ variation }}</vue-button>
 <vue-button @click="action" :color="variation" disabled>{{ variation }} disabled</vue-button>
@@ -27,17 +27,17 @@ story.add(
 </template>
 </div>
 `,
-    methods: {
-      action: action('@onClick'),
-    },
-  })),
+        methods: {
+            action: action('@onClick'),
+        },
+    })),
 );
 
 story.add(
-  'Button as Link',
-  withInfo({})(() => ({
-    components: { VueButton },
-    template: `<div>
+    'Button as Link',
+    withInfo({})(() => ({
+        components: {VueButton},
+        template: `<div>
 Router-Link<br/>
 <vue-button @click="action" as="router-link" color="primary" target="/">Router Link</vue-button>
 <vue-button @click="action" as="router-link" color="primary" target="/" disabled>Router Link</vue-button>
@@ -54,8 +54,8 @@ A-Element: <br/>
 <vue-button @click="action" as="a" color="primary" target="/" loading>Anchor</vue-button>
 </div>
 `,
-    methods: {
-      action: action('@onClick'),
-    },
-  })),
+        methods: {
+            action: action('@onClick'),
+        },
+    })),
 );

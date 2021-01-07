@@ -1,20 +1,20 @@
-import { storiesOf } from '@storybook/vue';
-import { withInfo } from 'storybook-addon-vue-info';
+import {storiesOf} from '@storybook/vue';
+import {withInfo} from 'storybook-addon-vue-info';
 import VueCollapse from './VueCollapse.vue';
 import VueButton from '../VueButton/VueButton.vue';
 
 const story = storiesOf('Molecules|Collapse', module) as any;
 
 story.add(
-  'Default',
-  withInfo({ propTablesExclude: [VueButton] })(() => ({
-    components: { VueCollapse, VueButton },
-    data() {
-      return {
-        show: true,
-      };
-    },
-    template: `
+    'Default',
+    withInfo({propTablesExclude: [VueButton]})(() => ({
+        components: {VueCollapse, VueButton},
+        data() {
+            return {
+                show: true,
+            };
+        },
+        template: `
 <div>
   <vue-button @click="show = !show" color="secondary">Collapse toggle</vue-button>
   <br />
@@ -31,5 +31,5 @@ story.add(
   </vue-collapse>
 </div>
   `,
-  })),
+    })),
 );

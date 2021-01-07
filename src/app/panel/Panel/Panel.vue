@@ -7,19 +7,73 @@
 				<vue-grid-item fill>
 					<vue-headline level="1">Panel</vue-headline>
 
-					<br>
+					<br><br>
 					<vue-headline level="4">Options:</vue-headline>
-					<div v-html="add"></div>
+					<hr>
+					<br>
+
+					<a v-if="add" href="/panel-add-ticket" class="add">
+						<vue-button color="primary">Add new ticket</vue-button>
+					</a>
+					<a href="/reset-password">
+						<vue-button color="primary">Reset password</vue-button>
+					</a>
+					<a href="/change-password">
+						<vue-button color="primary">Change password</vue-button>
+					</a>
+
+					<br><br>
+					<hr>
+					<br><br>
+
+					<vue-headline level="4">Filters:</vue-headline>
+					<br>
+
+					<span v-on:click="filterBranch()"><vue-button color="primary">Branch</vue-button></span>
+					<span v-on:click="filterModel()"><vue-button color="primary">Model</vue-button></span>
+					<span v-on:click="filterTitle()"><vue-button color="primary">Title</vue-button></span>
+					<span v-on:click="filterDescription()"><vue-button color="primary">Description</vue-button></span>
+					<span v-on:click="filterPreliminaryCosts()"><vue-button color="primary">Preliminary costs</vue-button></span>
+					<span v-on:click="filterEstimatedPrice()"><vue-button color="primary">Estimated price</vue-button></span>
+					<span v-on:click="filterFinalPrice()"><vue-button color="primary">Final price</vue-button></span>
+					<span v-on:click="filterEstimatedEndDate()"><vue-button color="primary">End date</vue-button></span>
+					<span v-on:click="filterAttachedItems()"><vue-button color="primary">Attached items</vue-button></span>
+					<span v-on:click="filterStatus()"><vue-button color="primary">Status</vue-button></span>
+
+					<br><br>
+					<hr>
 
 				</vue-grid-item>
 			</vue-grid-row>
+
+			<br><br><br>
 			<vue-grid-row>
 				<vue-grid-item fill>
-					<table v-html="client"></table>
+					<form :class="$style.formExample" @submit.prevent="onSubmit">
+
+						<vue-grid-row>
+							<vue-grid-item>
+								<vue-input
+										name="search"
+										id="search"
+										placeholder="Seach tickets:"
+										validation="required|email"
+										v-model="form.search"
+								/>
+							</vue-grid-item>
+						</vue-grid-row>
+						<vue-button color="primary" :disabled="isSubmitDisabled" :loading="isLoading">Search</vue-button>
+					</form>
+				</vue-grid-item>
+			</vue-grid-row>
+
+			<vue-grid-row>
+				<vue-grid-item fill>
+					<table id="client" v-html="client"></table>
 
 					<br>
 					<table>
-						<tbody v-html="tbody"></tbody>
+						<tbody id="tbody" v-html="tbody"></tbody>
 					</table>
 
 					<br><br>
@@ -37,6 +91,7 @@
     import VueBreadcrumb from '@components/VueBreadcrumb/VueBreadcrumb.vue';
     import VueGridRow from '@/app/shared/components/VueGridRow/VueGridRow.vue';
     import VueGridItem from '@/app/shared/components/VueGridItem/VueGridItem.vue';
+    import VueInput from '@components/VueInput/VueInput.vue';
     import VueButton from '@/app/shared/components/VueButton/VueButton.vue';
     import VueHeadline from '@/app/shared/components/VueHeadline/VueHeadline.vue';
     import {PanelModule} from '../module';
@@ -45,7 +100,85 @@
     import VueCookies from 'vue-cookies'
     import {router} from "@/app/router";
 
+    function buildFilteredTable(url, formData) {
+        axios.get(`http://localhost:8081/users/login`, {
+            headers: {
+                'Authorization': `Basic ${Vue.$cookies.get('authorizationKey')}`
+            }
+        }).then(response => {
+            let accountType = response.data.role
+
+
+            console.log(formData);
+
+            axios({
+                method: (formData != undefined) ? 'post' : 'get',
+                url: url,
+                headers: {
+                    'Authorization': `Basic ${Vue.$cookies.get('authorizationKey')}`
+                },
+                data: formData,
+            }).then(response => {
+                let data = response.data.content,
+                    row = ``;
+
+                row +=
+                    `<tr>
+							<th>Brand&nbsp;&&nbsp;model</th>
+							<th>Title</th>
+							<th>Description</th>
+							<th>Preliminary&nbsp;costs</th>
+							<th>Estimated price</th>
+							<th>Final price</th>
+							<th>Estimated end date</th>
+							<th>Attached items</th>
+							<th>Status</th>
+							<th>Actions</th>
+						</tr>`;
+
+                data.forEach(value => {
+                    let date = value.estimatedRelease.split("T")[0].split("-");
+
+                    row +=
+                        `<tr>
+							<td>${value.brand} ${value.model}</td>
+							<td>${value.title}</td>
+							<td>${value.description}</td>
+							<td>${(value.calculationNote != undefined) ? value.calculationNote : '---'}</td>
+							<td>$${value.estimatedPrice}</td>
+							<td>${(value.finalPrice != undefined) ? '$' + value.finalPrice : '---'}</td>
+							<td>${date[1]}.${date[2]}.${date[0]}</td>
+							<td>${value.attachedItems}</td>
+							<td>${value.status.replaceAll('_', ' ')}</td>
+							${(accountType == 'EMPLOYEE' || accountType == 'HEAD') ? `<td><a href="/panel-edit-ticket?${value.uuid}">Edit</a></td>` : `<td><a href="/panel-view-ticket?${value.uuid}">View</a></td>`}
+						</tr>`
+
+                })
+
+                document.getElementById("tbody").innerHTML = row
+
+            }).catch(function () {
+
+                addNotification({
+                    title: 'Something is wrong!',
+                    text: 'Please reload page',
+                } as INotification);
+
+            });
+
+        }).catch(function () {
+            addNotification({
+                title: 'You\'re not logged!',
+                text: 'Please Log in to access this panel',
+            } as INotification);
+
+            router.replace('/');
+        });
+    }
+
     Vue.use(VueCookies);
+
+    let temp = true;
 
     export default {
         metaInfo: {
@@ -56,6 +189,7 @@
             VueBreadcrumb,
             VueGridRow,
             VueGridItem,
+            VueInput,
             VueButton,
             VueHeadline,
         },
@@ -63,8 +197,109 @@
             return {
                 client: null,
                 tbody: null,
-                add: null,
+                add: true,
+                form: {
+                    search: ''
+                },
+                isLoading: false,
             };
+        },
+        methods: {
+            filterBranch: () => {
+                if (temp == true) {
+                    temp = false;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=brand%2Casc', '')
+                } else {
+                    temp = true;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=brand%2Cdesc', '')
+                }
+            },
+            filterModel: () => {
+                if (temp == true) {
+                    temp = false;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=model%2Casc', '')
+                } else {
+                    temp = true;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=model%2Cdesc', '')
+                }
+            },
+            filterTitle: () => {
+                if (temp == true) {
+                    temp = false;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=title%2Casc', '')
+                } else {
+                    temp = true;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=title%2Cdesc', '')
+                }
+            },
+            filterDescription: () => {
+                if (temp == true) {
+                    temp = false;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=description%2Casc', '')
+                } else {
+                    temp = true;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=description%2Cdesc', '')
+                }
+            },
+            filterPreliminaryCosts: () => {
+                if (temp == true) {
+                    temp = false;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=calculationNote%2Casc', '')
+                } else {
+                    temp = true;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=calculationNote%2Cdesc', '')
+                }
+            },
+            filterEstimatedPrice: () => {
+                if (temp == true) {
+                    temp = false;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=estimatedPrice%2Casc', '')
+                } else {
+                    temp = true;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=estimatedPrice%2Cdesc', '')
+                }
+            },
+            filterFinalPrice: () => {
+                if (temp == true) {
+                    temp = false;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=finalPrice%2Casc', '')
+                } else {
+                    temp = true;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=finalPrice%2Cdesc', '')
+                }
+            },
+            filterEstimatedEndDate: () => {
+                if (temp == true) {
+                    temp = false;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=estimatedRelease%2Casc', '')
+                } else {
+                    temp = true;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=estimatedRelease%2Cdesc', '')
+                }
+            },
+            filterAttachedItems: () => {
+                if (temp == true) {
+                    temp = false;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=attachedItems%2Casc', '')
+                } else {
+                    temp = true;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=attachedItems%2Cdesc', '')
+                }
+            },
+            filterStatus: () => {
+                if (temp == true) {
+                    temp = false;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=status%2Casc', '')
+                } else {
+                    temp = true;
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=status%2Cdesc', '')
+                }
+            },
+            onSubmit() {
+                let formData = JSON.parse(JSON.stringify(this.form))
+                this.isLoading = true;
+                buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=brand%2Casc', formData)
+            },
         },
         mounted() {
 
@@ -75,7 +310,7 @@
             }).then(response => {
                 let accountType = response.data.role
 
-                axios.get(`http://localhost:8081/tickets?page=0&size=999`, {
+                axios.get('http://localhost:8081/tickets?page=0&size=999', {
                     headers: {
                         'Authorization': `Basic ${Vue.$cookies.get('authorizationKey')}`
                     }
@@ -83,18 +318,15 @@
                     let data = response.data.content,
                         row = ``;
 
-                    if (accountType == 'EMPLOYEE' || accountType == 'HEAD') {
-                        this.add = `<br><hr><br><a href="/panel-add-ticket">Add new ticket</a><br><br><hr>`
-                    }
-
                     if (accountType == 'CUSTOMER') {
+                        this.add = false;
                         this.client =
                             `<tr>
 								<td>
-									Contact with customer service:<br>
-									<b>Name:</b> Tom Potter<br>
-									<b>Email:</b> <a href="mailto:head@example.com">head@example.com</a><br>
-									<b>Phone:</b> <a href="tel:6543217890">6543217890</a><br>
+									Contact with your mechanic:<br>
+									<b>Name:</b> ${data[0].createdBy.firstName} ${data[0].createdBy.lastName}<br>
+									<b>Email:</b> <a href="mailto:${data[0].createdBy.email}">${data[0].createdBy.email}</a><br>
+									<b>Phone:</b> <a href="tel:${data[0].createdBy.mobilePhone}">${data[0].createdBy.mobilePhone}</a><br>
 								</td>
 								<td>
 									Client info:<br>
@@ -104,7 +336,6 @@
 								</td>
 							</tr>`;
                     }
-
 
                     row +=
                         `<tr>
@@ -117,9 +348,8 @@
 							<th>Estimated end date</th>
 							<th>Attached items</th>
 							<th>Status</th>
-							${(accountType == 'EMPLOYEE' || accountType == 'HEAD') ? '<th>Action</th>' : ''}
+							<th>Actions</th>
 						</tr>`;
-
 
                     data.forEach(value => {
                         let date = value.estimatedRelease.split("T")[0].split("-");
@@ -135,7 +365,7 @@
 								<td>${date[1]}.${date[2]}.${date[0]}</td>
 								<td>${value.attachedItems}</td>
 								<td>${value.status.replaceAll('_', ' ')}</td>
-								${(accountType == 'EMPLOYEE' || accountType == 'HEAD') ? `<td><a href="http://localhost:3000/panel-edit-ticket?${value.uuid}">Edit</a></td>` : ''}
+								${(accountType == 'EMPLOYEE' || accountType == 'HEAD') ? `<td><a href="/panel-edit-ticket?${value.uuid}">Edit</a></td>` : `<td><a href="/panel-view-ticket?${value.uuid}">View</a></td>`}
 							</tr>`
 
                     })
@@ -150,6 +380,7 @@
                     } as INotification);
 
                 });
+
             }).catch(function () {
                 addNotification({
                     title: 'You\'re not logged!',
@@ -158,14 +389,31 @@
 
                 router.replace('/');
             });
+
         },
-        methods: {},
         computed: {
             breadCrumbItems() {
                 return [
                     {label: this.$t('common.home' /* Home */), href: '/'},
                     {label: this.$t('common.Panel' /* Panel */), href: '/panel'},
                 ];
+            },
+            hasErrors() {
+                return this.errors && this.errors.items.length > 0;
+            },
+            hasEmptyFields() {
+                let hasEmptyField: boolean = false;
+
+                Object.keys(this.form).forEach((key: string) => {
+                    if (key !== 'newsletter' && (this.form[key] === '' || this.form[key] === false)) {
+                        hasEmptyField = true;
+                    }
+                });
+
+                return hasEmptyField;
+            },
+            isSubmitDisabled() {
+                return this.hasErrors || this.hasEmptyFields;
             },
         },
         beforeCreate() {

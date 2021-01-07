@@ -1,4 +1,4 @@
 export interface IChartDataItem {
-  label: string;
-  value: number;
+    label: string;
+    value: number;
 }

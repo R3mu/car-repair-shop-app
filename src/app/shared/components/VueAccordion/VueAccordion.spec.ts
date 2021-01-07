@@ -1,4 +1,4 @@
-import { createLocalVue, mount } from '@vue/test-utils';
+import {createLocalVue, mount} from '@vue/test-utils';
 import VueAccordion from './VueAccordion.vue';
 import VueAccordionItem from './VueAccordionItem/VueAccordionItem.vue';
 
@@ -7,84 +7,84 @@ const localVue = createLocalVue();
 localVue.component('vueA-accordion-item', VueAccordionItem);
 
 describe('VueAccordion.vue', () => {
-  test('renders component with an accordion item', () => {
-    const wrapper = mount<any>(VueAccordion, {
-      localVue,
-      slots: {
-        default: '<vueA-accordion-item title="foo" :initOpen="false"/>',
-      },
+    test('renders component with an accordion item', () => {
+        const wrapper = mount<any>(VueAccordion, {
+            localVue,
+            slots: {
+                default: '<vueA-accordion-item title="foo" :initOpen="false"/>',
+            },
+        });
+
+        const accordionItemWrapper: any = wrapper.find(VueAccordionItem);
+
+        accordionItemWrapper.vm.$parent = wrapper.vm;
+        accordionItemWrapper.vm.$options.created[1].call(accordionItemWrapper.vm);
+
+        expect(wrapper.vm.items.length).toBeGreaterThan(0);
+        expect(wrapper.vm.openItems.length).toBe(0);
+
+        wrapper.destroy();
     });
 
-    const accordionItemWrapper: any = wrapper.find(VueAccordionItem);
+    test('renders component with an open accordion item', () => {
+        const wrapper = mount<any>(VueAccordion, {
+            localVue,
+            slots: {
+                default: '<vueA-accordion-item title="foo" :initOpen="true"/>',
+            },
+        });
 
-    accordionItemWrapper.vm.$parent = wrapper.vm;
-    accordionItemWrapper.vm.$options.created[1].call(accordionItemWrapper.vm);
+        const accordionItemWrapper: any = wrapper.find(VueAccordionItem);
 
-    expect(wrapper.vm.items.length).toBeGreaterThan(0);
-    expect(wrapper.vm.openItems.length).toBe(0);
+        accordionItemWrapper.vm.$parent = wrapper.vm;
+        accordionItemWrapper.vm.$options.created[1].call(accordionItemWrapper.vm);
 
-    wrapper.destroy();
-  });
+        expect(wrapper.vm.items.length).toBeGreaterThan(0);
+        expect(wrapper.vm.openItems.length).toBeGreaterThan(0);
 
-  test('renders component with an open accordion item', () => {
-    const wrapper = mount<any>(VueAccordion, {
-      localVue,
-      slots: {
-        default: '<vueA-accordion-item title="foo" :initOpen="true"/>',
-      },
+        wrapper.destroy();
     });
 
-    const accordionItemWrapper: any = wrapper.find(VueAccordionItem);
+    test('should handle single accordion', () => {
+        const wrapper = mount<any>(VueAccordion, {
+            localVue,
+            propsData: {
+                multiple: false,
+            },
+        });
 
-    accordionItemWrapper.vm.$parent = wrapper.vm;
-    accordionItemWrapper.vm.$options.created[1].call(accordionItemWrapper.vm);
+        expect(wrapper.vm.openItems).toEqual([]);
 
-    expect(wrapper.vm.items.length).toBeGreaterThan(0);
-    expect(wrapper.vm.openItems.length).toBeGreaterThan(0);
+        wrapper.vm.openItem(0);
+        expect(wrapper.vm.openItems).toEqual([0]);
 
-    wrapper.destroy();
-  });
+        wrapper.vm.openItem(1);
+        expect(wrapper.vm.openItems).toEqual([1]);
 
-  test('should handle single accordion', () => {
-    const wrapper = mount<any>(VueAccordion, {
-      localVue,
-      propsData: {
-        multiple: false,
-      },
+        wrapper.vm.openItem(1);
+        expect(wrapper.vm.openItems).toEqual([]);
     });
 
-    expect(wrapper.vm.openItems).toEqual([]);
+    test('should handle multiple accordion', () => {
+        const wrapper = mount<any>(VueAccordion, {
+            localVue,
+            propsData: {
+                multiple: true,
+            },
+        });
 
-    wrapper.vm.openItem(0);
-    expect(wrapper.vm.openItems).toEqual([0]);
+        expect(wrapper.vm.openItems).toEqual([]);
 
-    wrapper.vm.openItem(1);
-    expect(wrapper.vm.openItems).toEqual([1]);
+        wrapper.vm.openItem(0);
+        expect(wrapper.vm.openItems).toEqual([0]);
 
-    wrapper.vm.openItem(1);
-    expect(wrapper.vm.openItems).toEqual([]);
-  });
+        wrapper.vm.openItem(1);
+        expect(wrapper.vm.openItems).toEqual([0, 1]);
 
-  test('should handle multiple accordion', () => {
-    const wrapper = mount<any>(VueAccordion, {
-      localVue,
-      propsData: {
-        multiple: true,
-      },
+        wrapper.vm.openItem(1);
+        expect(wrapper.vm.openItems).toEqual([0]);
+
+        wrapper.vm.openItem(0);
+        expect(wrapper.vm.openItems).toEqual([]);
     });
-
-    expect(wrapper.vm.openItems).toEqual([]);
-
-    wrapper.vm.openItem(0);
-    expect(wrapper.vm.openItems).toEqual([0]);
-
-    wrapper.vm.openItem(1);
-    expect(wrapper.vm.openItems).toEqual([0, 1]);
-
-    wrapper.vm.openItem(1);
-    expect(wrapper.vm.openItems).toEqual([0]);
-
-    wrapper.vm.openItem(0);
-    expect(wrapper.vm.openItems).toEqual([]);
-  });
 });

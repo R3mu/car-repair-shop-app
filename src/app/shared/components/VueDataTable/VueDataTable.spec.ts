@@ -1,187 +1,187 @@
-import { createLocalVue, mount } from '@vue/test-utils';
-import { i18n } from '../../plugins/i18n/i18n';
+import {createLocalVue, mount} from '@vue/test-utils';
+import {i18n} from '../../plugins/i18n/i18n';
 import VueDataTable from './VueDataTable.vue';
-import { IComputedDataRowCell, IDataTableHeader } from './IDataTable';
+import {IComputedDataRowCell, IDataTableHeader} from './IDataTable';
 import VueDataTableSearch from './VueDataTableSearch/VueDataTableSearch.vue';
 import VueDataTableHeader from './VueDataTableHeader/VueDataTableHeader.vue';
 import VuePagination from '../VuePagination/VuePagination.vue';
-import { dataTableDataFixture, dataTableHeaderFixture } from './DataTableFixtures';
+import {dataTableDataFixture, dataTableHeaderFixture} from './DataTableFixtures';
 
 const localVue = createLocalVue();
 
 describe('VueDataTable.vue', () => {
-  const header: IDataTableHeader = dataTableHeaderFixture;
-  const data: any[] = dataTableDataFixture;
+    const header: IDataTableHeader = dataTableHeaderFixture;
+    const data: any[] = dataTableDataFixture;
 
-  test('renders component', () => {
-    const wrapper = mount<any>(VueDataTable, {
-      i18n,
-      localVue,
-      propsData: {
-        header,
-        data,
-      },
+    test('renders component', () => {
+        const wrapper = mount<any>(VueDataTable, {
+            i18n,
+            localVue,
+            propsData: {
+                header,
+                data,
+            },
+        });
+
+        expect(wrapper.findAll(VueDataTableSearch)).toHaveLength(1);
+        expect(wrapper.findAll(VueDataTableHeader)).toHaveLength(1);
+        expect(wrapper.findAll('.vueDataTableRow')).toHaveLength(5);
+        expect(wrapper.findAll(VuePagination)).toHaveLength(1);
     });
 
-    expect(wrapper.findAll(VueDataTableSearch)).toHaveLength(1);
-    expect(wrapper.findAll(VueDataTableHeader)).toHaveLength(1);
-    expect(wrapper.findAll('.vueDataTableRow')).toHaveLength(5);
-    expect(wrapper.findAll(VuePagination)).toHaveLength(1);
-  });
+    test('renders component without search', () => {
+        const wrapper = mount<any>(VueDataTable, {
+            i18n,
+            localVue,
+            propsData: {
+                header,
+                data,
+                showSearch: false,
+            },
+        });
 
-  test('renders component without search', () => {
-    const wrapper = mount<any>(VueDataTable, {
-      i18n,
-      localVue,
-      propsData: {
-        header,
-        data,
-        showSearch: false,
-      },
+        expect(wrapper.findAll(VueDataTableSearch)).toHaveLength(0);
+        expect(wrapper.findAll(VueDataTableHeader)).toHaveLength(1);
+        expect(wrapper.findAll('.vueDataTableRow')).toHaveLength(5);
+        expect(wrapper.findAll(VuePagination)).toHaveLength(1);
     });
 
-    expect(wrapper.findAll(VueDataTableSearch)).toHaveLength(0);
-    expect(wrapper.findAll(VueDataTableHeader)).toHaveLength(1);
-    expect(wrapper.findAll('.vueDataTableRow')).toHaveLength(5);
-    expect(wrapper.findAll(VuePagination)).toHaveLength(1);
-  });
+    test('should filter data', async () => {
+        const wrapper = mount<any>(VueDataTable, {
+            i18n,
+            localVue,
+            propsData: {
+                header,
+                data,
+            },
+        });
 
-  test('should filter data', async () => {
-    const wrapper = mount<any>(VueDataTable, {
-      i18n,
-      localVue,
-      propsData: {
-        header,
-        data,
-      },
+        wrapper.vm.searchTerm = 'julia';
+        await wrapper.vm.$nextTick();
+        expect(wrapper.findAll(VueDataTableSearch)).toHaveLength(1);
+        expect(wrapper.findAll(VueDataTableHeader)).toHaveLength(1);
+        expect(wrapper.findAll('.vueDataTableRow')).toHaveLength(4);
+
+        wrapper.vm.searchTerm = 'z';
+        await wrapper.vm.$nextTick();
+        expect(wrapper.findAll(VueDataTableSearch)).toHaveLength(1);
+        expect(wrapper.findAll(VueDataTableHeader)).toHaveLength(1);
+        expect(wrapper.findAll('.noResults')).toHaveLength(1);
+        expect(wrapper.findAll('.vueDataTableRow')).toHaveLength(0);
     });
 
-    wrapper.vm.searchTerm = 'julia';
-    await wrapper.vm.$nextTick();
-    expect(wrapper.findAll(VueDataTableSearch)).toHaveLength(1);
-    expect(wrapper.findAll(VueDataTableHeader)).toHaveLength(1);
-    expect(wrapper.findAll('.vueDataTableRow')).toHaveLength(4);
+    test('should sort data', async () => {
+        const wrapper = mount<any>(VueDataTable, {
+            i18n,
+            localVue,
+            propsData: {
+                header,
+                data,
+            },
+        });
 
-    wrapper.vm.searchTerm = 'z';
-    await wrapper.vm.$nextTick();
-    expect(wrapper.findAll(VueDataTableSearch)).toHaveLength(1);
-    expect(wrapper.findAll(VueDataTableHeader)).toHaveLength(1);
-    expect(wrapper.findAll('.noResults')).toHaveLength(1);
-    expect(wrapper.findAll('.vueDataTableRow')).toHaveLength(0);
-  });
+        await wrapper.setProps({sortKey: 'firstname'});
 
-  test('should sort data', async () => {
-    const wrapper = mount<any>(VueDataTable, {
-      i18n,
-      localVue,
-      propsData: {
-        header,
-        data,
-      },
+        expect(wrapper.vm.sortedData[0].firstname).toBe('Julia');
+        expect(wrapper.vm.sortedData[1].firstname).toBe('Julia');
+        expect(wrapper.vm.sortedData[2].firstname).toBe('Julia');
+        expect(wrapper.vm.sortedData[3].firstname).toBe('Julia');
+
+        await wrapper.setProps({sortDirection: 'desc'});
+
+        expect(wrapper.vm.sortedData[0].firstname).toBe('Toni');
+        expect(wrapper.vm.sortedData[1].firstname).toBe('Toni');
+        expect(wrapper.vm.sortedData[2].firstname).toBe('Toni');
+        expect(wrapper.vm.sortedData[3].firstname).toBe('Toni');
     });
 
-    await wrapper.setProps({ sortKey: 'firstname' });
+    test('should change page', () => {
+        const wrapper = mount<any>(VueDataTable, {
+            i18n,
+            localVue,
+            propsData: {
+                header,
+                data,
+            },
+        });
 
-    expect(wrapper.vm.sortedData[0].firstname).toBe('Julia');
-    expect(wrapper.vm.sortedData[1].firstname).toBe('Julia');
-    expect(wrapper.vm.sortedData[2].firstname).toBe('Julia');
-    expect(wrapper.vm.sortedData[3].firstname).toBe('Julia');
+        wrapper.vm.paginationClick(2);
 
-    await wrapper.setProps({ sortDirection: 'desc' });
-
-    expect(wrapper.vm.sortedData[0].firstname).toBe('Toni');
-    expect(wrapper.vm.sortedData[1].firstname).toBe('Toni');
-    expect(wrapper.vm.sortedData[2].firstname).toBe('Toni');
-    expect(wrapper.vm.sortedData[3].firstname).toBe('Toni');
-  });
-
-  test('should change page', () => {
-    const wrapper = mount<any>(VueDataTable, {
-      i18n,
-      localVue,
-      propsData: {
-        header,
-        data,
-      },
+        expect(wrapper.vm.currentPage).toBe(1);
     });
 
-    wrapper.vm.paginationClick(2);
+    test('should emit click', () => {
+        const wrapper = mount<any>(VueDataTable, {
+            i18n,
+            localVue,
+            propsData: {
+                header,
+                data,
+            },
+        });
+        const cells: IComputedDataRowCell[] = [
+            {key: 'id', value: 2, visible: false, slot: undefined, cssClass: null},
+            {key: 'name', value: 'foo', visible: false, slot: undefined, cssClass: null},
+        ];
 
-    expect(wrapper.vm.currentPage).toBe(1);
-  });
+        wrapper.vm.rowClick(cells);
 
-  test('should emit click', () => {
-    const wrapper = mount<any>(VueDataTable, {
-      i18n,
-      localVue,
-      propsData: {
-        header,
-        data,
-      },
-    });
-    const cells: IComputedDataRowCell[] = [
-      { key: 'id', value: 2, visible: false, slot: undefined, cssClass: null },
-      { key: 'name', value: 'foo', visible: false, slot: undefined, cssClass: null },
-    ];
-
-    wrapper.vm.rowClick(cells);
-
-    expect(wrapper.emitted('click')).toBeTruthy();
-    expect(wrapper.emitted('click')[0][0]).toEqual({ id: 2, name: 'foo' });
-  });
-
-  test('should sort', () => {
-    const wrapper = mount<any>(VueDataTable, {
-      i18n,
-      localVue,
-      propsData: {
-        header,
-        data,
-      },
+        expect(wrapper.emitted('click')).toBeTruthy();
+        expect(wrapper.emitted('click')[0][0]).toEqual({id: 2, name: 'foo'});
     });
 
-    expect(wrapper.vm.internalSortKey).toBe(null);
-    expect(wrapper.vm.internalSortDirection).toBe('asc');
+    test('should sort', () => {
+        const wrapper = mount<any>(VueDataTable, {
+            i18n,
+            localVue,
+            propsData: {
+                header,
+                data,
+            },
+        });
 
-    wrapper.vm.columnClick({ sortKey: 'foo' });
-    expect(wrapper.vm.internalSortKey).toBe('foo');
-    expect(wrapper.vm.internalSortDirection).toBe('asc');
+        expect(wrapper.vm.internalSortKey).toBe(null);
+        expect(wrapper.vm.internalSortDirection).toBe('asc');
 
-    wrapper.vm.columnClick({ sortKey: 'foo' });
-    expect(wrapper.vm.internalSortKey).toBe('foo');
-    expect(wrapper.vm.internalSortDirection).toBe('desc');
+        wrapper.vm.columnClick({sortKey: 'foo'});
+        expect(wrapper.vm.internalSortKey).toBe('foo');
+        expect(wrapper.vm.internalSortDirection).toBe('asc');
 
-    wrapper.vm.columnClick({ sortKey: 'foo' });
-    expect(wrapper.vm.internalSortKey).toBe(null);
-    expect(wrapper.vm.internalSortDirection).toBe('asc');
-  });
+        wrapper.vm.columnClick({sortKey: 'foo'});
+        expect(wrapper.vm.internalSortKey).toBe('foo');
+        expect(wrapper.vm.internalSortDirection).toBe('desc');
 
-  test('should display all the data if maxRows is set less or equal 0', () => {
-    const wrapper = mount<any>(VueDataTable, {
-      i18n,
-      localVue,
-      propsData: {
-        header,
-        data,
-        maxRows: -1,
-      },
+        wrapper.vm.columnClick({sortKey: 'foo'});
+        expect(wrapper.vm.internalSortKey).toBe(null);
+        expect(wrapper.vm.internalSortDirection).toBe('asc');
     });
 
-    expect(wrapper.vm.displayData).toHaveLength(20);
-    expect(wrapper.vm.maxPages).toBe(0);
-  });
+    test('should display all the data if maxRows is set less or equal 0', () => {
+        const wrapper = mount<any>(VueDataTable, {
+            i18n,
+            localVue,
+            propsData: {
+                header,
+                data,
+                maxRows: -1,
+            },
+        });
 
-  test('should add custom css class', () => {
-    const wrapper = mount<any>(VueDataTable, {
-      i18n,
-      localVue,
-      propsData: {
-        header,
-        data,
-        maxRows: 0,
-      },
+        expect(wrapper.vm.displayData).toHaveLength(20);
+        expect(wrapper.vm.maxPages).toBe(0);
     });
 
-    expect(wrapper.findAll('.ageColumn')).toHaveLength(21);
-  });
+    test('should add custom css class', () => {
+        const wrapper = mount<any>(VueDataTable, {
+            i18n,
+            localVue,
+            propsData: {
+                header,
+                data,
+                maxRows: 0,
+            },
+        });
+
+        expect(wrapper.findAll('.ageColumn')).toHaveLength(21);
+    });
 });
