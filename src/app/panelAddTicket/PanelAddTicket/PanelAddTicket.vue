@@ -143,7 +143,7 @@
 										id="estimatedRelease"
 										required
 										type="input"
-										:placeholder="$t('estimatedenddate')"
+										placeholder="$t('estimatedenddate')"
 										validation="required"
 										v-model="form.estimatedRelease"
 										:error-message="$t('components.formExample.estimatedRelease.error')"
@@ -256,7 +256,7 @@
                     title: null,
                     description: null,
                     estimatedPrice: null,
-                    estimatedRelease: '2021-01-01T00:00:00.000000Z',
+                    estimatedRelease: '12/30/2021',
                     attachedItems: null,
                     status: 'CREATED',
                 },
@@ -340,8 +340,8 @@
                     setTimeout(() => {
                         this.isLoading = false;
                         addNotification({
-                            title: 'ERROR!',
-                            text: error,
+                            title: "ERROR",
+                            text: error.response.data.errors,
                         } as INotification);
                     }, 1000);
                 });

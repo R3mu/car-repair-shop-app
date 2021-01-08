@@ -142,8 +142,6 @@
                 languages: [
                     {label: 'English', value: 'en'},
                     {label: 'Deutsch', value: 'de'},
-                    {label: 'Português', value: 'pt'},
-                    {label: '中文', value: 'zh-cn'},
                 ],
                 showLoginModal: false,
                 isLoginPending: false,
@@ -184,6 +182,7 @@
                 this.$router.push('/');
 
                 this.$cookies.remove("authorizationKey");
+                this.$cookies.remove("authorizationEmail");
 
                 this.isLoginPending = false;
                 this.showLoginModal = false;

@@ -5,7 +5,7 @@
 		<vue-grid>
 			<vue-grid-row>
 				<vue-grid-item class="vueGridItem">
-					<img src="../../../../images/logo.png" alt="car-repair-shop-app"/>
+					<br><br><br><br><br><br>
 					<vue-headline level="1">Car repair shop</vue-headline>
 					<div :class="$style.subTitle">
 						{{ $t('App.core.description') }}

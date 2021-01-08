@@ -1,35 +1,35 @@
 import {createLocalVue, mount} from '@vue/test-utils';
 import Vuex, {Store} from 'vuex';
 import {i18n} from '@/app/shared/plugins/i18n/i18n';
-import PanelEditTicket from './PanelEditTicket.vue';
+import PanelViewTicket from './PanelViewTicket.vue';
 import {IState} from '@/app/state';
-import {PanelEditTicketModule} from '../module';
+import {PanelViewTicketModule} from '../module';
 
 const localVue = createLocalVue();
 
 localVue.use(Vuex);
 
-describe('PanelEditTicket.vue', () => {
+describe('PanelViewTicket.vue', () => {
     let store: Store<IState>;
 
     beforeEach(() => {
         store = new Vuex.Store({
             modules: {
-                panelEditTicket: PanelEditTicketModule,
+                panelViewTicket: PanelViewTicketModule,
             },
         } as any);
     });
 
     test('renders component', () => {
-        const wrapper = mount<any>(PanelEditTicket, {
+        const wrapper = mount<any>(PanelViewTicket, {
             store,
             localVue,
             i18n,
             stubs: ['router-link'],
         });
 
-        PanelEditTicket.prefetch({});
+        PanelViewTicket.prefetch({});
 
-        expect(wrapper.find('h1').text()).toBe('Ticket Editor');
+        expect(wrapper.find('h1').text()).toBe('Tickets info');
     });
 });

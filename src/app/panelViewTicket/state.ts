@@ -1,11 +1,11 @@
-export interface IPanelAddTicketState {
+export interface IPanelViewTicketState {
     /**
      * put your state attributes here, for example:
      * myAttribute: any;
      */
 }
 
-export const PanelAddTicketDefaultState = (): IPanelAddTicketState => {
+export const PanelViewTicketDefaultState = (): IPanelViewTicketState => {
     return {
         /**
          * put your default value here, for example:

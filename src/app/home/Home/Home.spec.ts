@@ -29,6 +29,6 @@ describe('Home.vue', () => {
         });
 
         expect(wrapper.findAll(Stage)).toHaveLength(1);
-        expect(wrapper.findAll(HomeSection)).toHaveLength(4);
+        expect(wrapper.findAll(HomeSection)).toHaveLength(3);
     });
 });

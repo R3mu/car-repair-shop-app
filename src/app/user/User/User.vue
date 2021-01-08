@@ -5,17 +5,25 @@
 
 			<vue-grid-row>
 				<vue-grid-item fill>
-					<vue-headline level="1">User</vue-headline>
-
-					<div v-html="add"></div>
-
+					<vue-headline level="1">Users list</vue-headline>
 				</vue-grid-item>
 			</vue-grid-row>
 			<vue-grid-row>
 				<vue-grid-item fill>
-					<table v-html="client"></table>
 
+					<div v-if="add">
+						<br><br>
+						<vue-headline level="4">Options:</vue-headline>
+						<hr><br>
+
+						<a href="/panel-add-user" class="add">
+							<vue-button color="primary">Add new user</vue-button>
+						</a>
+
+						<br>
+					</div>
 					<br>
+
 					<table>
 						<tbody v-html="tbody"></tbody>
 					</table>
@@ -61,7 +69,7 @@
             return {
                 client: null,
                 tbody: null,
-                add: null,
+                add: true,
             };
         },
         mounted() {
@@ -73,92 +81,54 @@
             }).then(response => {
                 let accountType = response.data.role
 
+                if (accountType == 'CUSTOMER') {
+                    router.replace('/');
+                }
+
                 axios.get(`http://localhost:8081/users`, {
                     headers: {
                         'Authorization': `Basic ${Vue.$cookies.get('authorizationKey')}`
                     }
                 }).then(response => {
-
-
-                    console.log(response);
-
-
                     let data = response.data.content,
                         row = ``;
 
-                    if (accountType == 'EMPLOYEE' || accountType == 'HEAD') {
-                        this.add = `<br><p><strong>Options:</strong></p><br><hr><br><a href="/panel-add-ticket">Add new ticket</a><br><br><hr>`
-                    }
-
-
                     if (accountType == 'CUSTOMER') {
-                        this.client =
-                            `<tr>
-								<td>
-									Contact with customer service:<br>
-									<b>Name:</b> Tom Potter<br>
-									<b>Email:</b> <a href="mailto:head@example.com">head@example.com</a><br>
-									<b>Phone:</b> <a href="tel:6543217890">6543217890</a><br>
-								</td>
-								<td>
-									Client info:<br>
-									<b>Name:</b> ${data[0].customer.firstName} ${data[0].customer.lastName}<br>
-									<b>Email:</b> <a href="mailto:${data[0].customer.email}">${data[0].customer.email}</a><br>
-									<b>Phone:</b> <a href="tel:${data[0].customer.mobilePhone}">${data[0].customer.mobilePhone}</a><br>
-								</td>
-							</tr>`;
+                        this.add = false;
                     }
-
 
                     row +=
                         `<tr>
-							<th>Brand&nbsp;&&nbsp;model</th>
-							<th>Title</th>
-							<th>Description</th>
-							<th>Preliminary&nbsp;costs</th>
-							<th>Estimated price</th>
-							<th>Final price</th>
-							<th>Estimated end date</th>
-							<th>Attached items</th>
-							<th>Status</th>
-							${(accountType == 'EMPLOYEE' || accountType == 'HEAD') ? '<th>Action</th>' : ''}
+							<th>First name and last name</th>
+							<th>Email address</th>
+							<th>Phone number</th>
+							<th>Role</th>
+							<th>uuid</th>
 						</tr>`;
 
-
                     data.forEach(value => {
-                        let date = value.estimatedRelease.split("T")[0].split("-");
-
                         row +=
                             `<tr>
-								<td>${value.brand} ${value.model}</td>
-								<td>${value.title}</td>
-								<td>${value.description}</td>
-								<td>${(value.calculationNote != undefined) ? value.calculationNote : '---'}</td>
-								<td>$${value.estimatedPrice}</td>
-								<td>${(value.finalPrice != undefined) ? '$' + value.finalPrice : '---'}</td>
-								<td>${date[1]}.${date[2]}.${date[0]}</td>
-								<td>${value.attachedItems}</td>
-								<td>${value.status.replaceAll('_', ' ')}</td>
-								${(accountType == 'EMPLOYEE' || accountType == 'HEAD') ? `<td><a href="http://localhost:3000/user-edit-ticket?${value.uuid}">Edit</a></td>` : ''}
+								<td>${value.firstName} ${value.lastName}</td>
+								<td><a href="mailto:${value.email}">${value.email}</a></td>
+								<td><a href="tel:${value.mobilePhone}">${value.mobilePhone}</a></td>
+								<td>${value.role}</td>
+								<td>${value.uuid}</td>
 							</tr>`
 
                     })
 
                     this.tbody = row
 
-                }).catch((error) => {
-
-
-                    console.log(error);
-
-
+                }).catch(error => {
                     addNotification({
-                        title: 'Something is wrong!',
-                        text: 'Please reload page',
+                        title: "ERROR",
+                        text: error.response.data.errors,
                     } as INotification);
 
                 });
-            }).catch(function () {
+
+            }).catch(() => {
                 addNotification({
                     title: 'You\'re not logged!',
                     text: 'Please Log in to access this user',

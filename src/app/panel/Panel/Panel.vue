@@ -15,7 +15,7 @@
 					<a v-if="add" href="/panel-add-ticket" class="add">
 						<vue-button color="primary">Add new ticket</vue-button>
 					</a>
-					<a href="/reset-password">
+					<a v-if="add" href="/reset-password">
 						<vue-button color="primary">Reset password</vue-button>
 					</a>
 					<a href="/change-password">
@@ -49,7 +49,7 @@
 			<br><br><br>
 			<vue-grid-row>
 				<vue-grid-item fill>
-					<form :class="$style.formExample" @submit.prevent="onSubmit">
+					<form v-if="search" :class="$style.formExample" @submit.prevent="onSubmit">
 
 						<vue-grid-row>
 							<vue-grid-item>
@@ -62,7 +62,7 @@
 								/>
 							</vue-grid-item>
 						</vue-grid-row>
-						<vue-button color="primary" :disabled="isSubmitDisabled" :loading="isLoading">Search</vue-button>
+						<vue-button color="primary">Search</vue-button>
 					</form>
 				</vue-grid-item>
 			</vue-grid-row>
@@ -100,7 +100,7 @@
     import VueCookies from 'vue-cookies'
     import {router} from "@/app/router";
 
-    function buildFilteredTable(url, formData) {
+    function buildFilteredTable(url) {
         axios.get(`http://localhost:8081/users/login`, {
             headers: {
                 'Authorization': `Basic ${Vue.$cookies.get('authorizationKey')}`
@@ -108,16 +108,12 @@
         }).then(response => {
             let accountType = response.data.role
 
+            console.log(url);
 
-            console.log(formData);
-
-            axios({
-                method: (formData != undefined) ? 'post' : 'get',
-                url: url,
+            axios.get(url, {
                 headers: {
                     'Authorization': `Basic ${Vue.$cookies.get('authorizationKey')}`
-                },
-                data: formData,
+                }
             }).then(response => {
                 let data = response.data.content,
                     row = ``;
@@ -137,8 +133,6 @@
 						</tr>`;
 
                 data.forEach(value => {
-                    let date = value.estimatedRelease.split("T")[0].split("-");
-
                     row +=
                         `<tr>
 							<td>${value.brand} ${value.model}</td>
@@ -147,7 +141,7 @@
 							<td>${(value.calculationNote != undefined) ? value.calculationNote : '---'}</td>
 							<td>$${value.estimatedPrice}</td>
 							<td>${(value.finalPrice != undefined) ? '$' + value.finalPrice : '---'}</td>
-							<td>${date[1]}.${date[2]}.${date[0]}</td>
+							<td>${value.estimatedRelease}</td>
 							<td>${value.attachedItems}</td>
 							<td>${value.status.replaceAll('_', ' ')}</td>
 							${(accountType == 'EMPLOYEE' || accountType == 'HEAD') ? `<td><a href="/panel-edit-ticket?${value.uuid}">Edit</a></td>` : `<td><a href="/panel-view-ticket?${value.uuid}">View</a></td>`}
@@ -157,13 +151,11 @@
 
                 document.getElementById("tbody").innerHTML = row
 
-            }).catch(function () {
-
+            }).catch(error => {
                 addNotification({
-                    title: 'Something is wrong!',
-                    text: 'Please reload page',
+                    title: "ERROR",
+                    text: error.response.data.errors,
                 } as INotification);
-
             });
 
         }).catch(function () {
@@ -198,107 +190,106 @@
                 client: null,
                 tbody: null,
                 add: true,
+                search: true,
                 form: {
                     search: ''
-                },
-                isLoading: false,
+                }
             };
         },
         methods: {
             filterBranch: () => {
                 if (temp == true) {
                     temp = false;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=brand%2Casc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=brand%2Casc')
                 } else {
                     temp = true;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=brand%2Cdesc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=brand%2Cdesc')
                 }
             },
             filterModel: () => {
                 if (temp == true) {
                     temp = false;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=model%2Casc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=model%2Casc')
                 } else {
                     temp = true;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=model%2Cdesc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=model%2Cdesc')
                 }
             },
             filterTitle: () => {
                 if (temp == true) {
                     temp = false;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=title%2Casc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=title%2Casc')
                 } else {
                     temp = true;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=title%2Cdesc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=title%2Cdesc')
                 }
             },
             filterDescription: () => {
                 if (temp == true) {
                     temp = false;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=description%2Casc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=description%2Casc')
                 } else {
                     temp = true;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=description%2Cdesc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=description%2Cdesc')
                 }
             },
             filterPreliminaryCosts: () => {
                 if (temp == true) {
                     temp = false;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=calculationNote%2Casc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=calculationNote%2Casc')
                 } else {
                     temp = true;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=calculationNote%2Cdesc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=calculationNote%2Cdesc')
                 }
             },
             filterEstimatedPrice: () => {
                 if (temp == true) {
                     temp = false;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=estimatedPrice%2Casc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=estimatedPrice%2Casc')
                 } else {
                     temp = true;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=estimatedPrice%2Cdesc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=estimatedPrice%2Cdesc')
                 }
             },
             filterFinalPrice: () => {
                 if (temp == true) {
                     temp = false;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=finalPrice%2Casc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=finalPrice%2Casc')
                 } else {
                     temp = true;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=finalPrice%2Cdesc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=finalPrice%2Cdesc')
                 }
             },
             filterEstimatedEndDate: () => {
                 if (temp == true) {
                     temp = false;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=estimatedRelease%2Casc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=estimatedRelease%2Casc')
                 } else {
                     temp = true;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=estimatedRelease%2Cdesc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=estimatedRelease%2Cdesc')
                 }
             },
             filterAttachedItems: () => {
                 if (temp == true) {
                     temp = false;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=attachedItems%2Casc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=attachedItems%2Casc')
                 } else {
                     temp = true;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=attachedItems%2Cdesc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=attachedItems%2Cdesc')
                 }
             },
             filterStatus: () => {
                 if (temp == true) {
                     temp = false;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=status%2Casc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=status%2Casc')
                 } else {
                     temp = true;
-                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=status%2Cdesc', '')
+                    buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=status%2Cdesc')
                 }
             },
             onSubmit() {
                 let formData = JSON.parse(JSON.stringify(this.form))
-                this.isLoading = true;
-                buildFilteredTable('http://localhost:8081/tickets?page=0&size=999&sort=brand%2Casc', formData)
+                buildFilteredTable(`http://localhost:8081/tickets/search?text=${formData["search"]}&page=0&size=999`);
             },
         },
         mounted() {
@@ -319,9 +310,10 @@
                         row = ``;
 
                     if (accountType == 'CUSTOMER') {
+                        this.search = false;
                         this.add = false;
                         this.client =
-                            `<tr>
+                            `<br><tr>
 								<td>
 									Contact with your mechanic:<br>
 									<b>Name:</b> ${data[0].createdBy.firstName} ${data[0].createdBy.lastName}<br>
@@ -352,8 +344,6 @@
 						</tr>`;
 
                     data.forEach(value => {
-                        let date = value.estimatedRelease.split("T")[0].split("-");
-
                         row +=
                             `<tr>
 								<td>${value.brand} ${value.model}</td>
@@ -362,7 +352,7 @@
 								<td>${(value.calculationNote != undefined) ? value.calculationNote : '---'}</td>
 								<td>$${value.estimatedPrice}</td>
 								<td>${(value.finalPrice != undefined) ? '$' + value.finalPrice : '---'}</td>
-								<td>${date[1]}.${date[2]}.${date[0]}</td>
+								<td>${value.estimatedRelease}</td>
 								<td>${value.attachedItems}</td>
 								<td>${value.status.replaceAll('_', ' ')}</td>
 								${(accountType == 'EMPLOYEE' || accountType == 'HEAD') ? `<td><a href="/panel-edit-ticket?${value.uuid}">Edit</a></td>` : `<td><a href="/panel-view-ticket?${value.uuid}">View</a></td>`}
@@ -372,13 +362,11 @@
 
                     this.tbody = row
 
-                }).catch(function () {
-
+                }).catch(error => {
                     addNotification({
-                        title: 'Something is wrong!',
-                        text: 'Please reload page',
+                        title: "ERROR",
+                        text: error.response.data.errors,
                     } as INotification);
-
                 });
 
             }).catch(function () {
@@ -397,24 +385,7 @@
                     {label: this.$t('common.home' /* Home */), href: '/'},
                     {label: this.$t('common.Panel' /* Panel */), href: '/panel'},
                 ];
-            },
-            hasErrors() {
-                return this.errors && this.errors.items.length > 0;
-            },
-            hasEmptyFields() {
-                let hasEmptyField: boolean = false;
-
-                Object.keys(this.form).forEach((key: string) => {
-                    if (key !== 'newsletter' && (this.form[key] === '' || this.form[key] === false)) {
-                        hasEmptyField = true;
-                    }
-                });
-
-                return hasEmptyField;
-            },
-            isSubmitDisabled() {
-                return this.hasErrors || this.hasEmptyFields;
-            },
+            }
         },
         beforeCreate() {
             registerModule('panel', PanelModule);

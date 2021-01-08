@@ -1,28 +1,14 @@
 <template>
-	<div :class="$style.login">
+	<div :class="$style.changePassword">
 		<vue-grid>
 			<vue-breadcrumb :items="breadCrumbItems"></vue-breadcrumb>
 
 			<vue-grid-row>
 				<vue-grid-item fill>
-					<vue-headline level="1">Login</vue-headline>
+					<vue-headline level="1">Change password</vue-headline>
 					<br/>
 					<br/>
-					<form id="login" :class="$style.formExample" @submit.prevent="onSubmit">
-
-						<vue-grid-row>
-							<vue-grid-item>
-								<vue-input
-										name="email"
-										id="email"
-										required
-										type="email"
-										placeholder="E-mail"
-										validation="required|email"
-										v-model="form.email"
-								/>
-							</vue-grid-item>
-						</vue-grid-row>
+					<form :class="$style.formExample" @submit.prevent="onSubmit">
 
 						<vue-grid-row>
 							<vue-grid-item>
@@ -39,7 +25,7 @@
 						</vue-grid-row>
 
 						<br/>
-						<vue-button color="primary" :disabled="isSubmitDisabled" :loading="isLoading">LOGIN</vue-button>
+						<vue-button color="primary" :disabled="isSubmitDisabled" :loading="isLoading">RESET</vue-button>
 					</form>
 				</vue-grid-item>
 			</vue-grid-row>
@@ -49,7 +35,7 @@
 </template>
 
 <script lang="ts">
-	import Vue from 'vue';
+    import Vue from 'vue';
     import {registerModule} from '@/app/store';
     import {addNotification, INotification} from '@components/VueNotificationStack/utils';
     import {IPreLoad} from '@/server/isomorphic';
@@ -62,7 +48,7 @@
     import VueSelect from '@components/VueSelect/VueSelect.vue';
     import VueCheckbox from '@components/VueCheckbox/VueCheckbox.vue';
     import VueHeadline from '@/app/shared/components/VueHeadline/VueHeadline.vue';
-    import {LoginModule} from '../module';
+    import {ChangePasswordModule} from '../module';
     import axios from 'axios';
     import VueCookies from 'vue-cookies'
 
@@ -72,9 +58,9 @@
         $_veeValidate: {
             validator: 'new' as 'new',
         },
-        name: 'Login',
+        name: 'ChangePassword',
         metaInfo: {
-            title: 'Login',
+            title: 'ChangePassword',
         },
         components: {
             VueGrid,
@@ -90,8 +76,7 @@
         data(): any {
             return {
                 form: {
-                    email: '',
-                    password: ''
+                    password: '',
                 },
                 isLoading: false,
             };
@@ -100,7 +85,8 @@
             breadCrumbItems() {
                 return [
                     {label: this.$t('common.home' /* Home */), href: '/'},
-                    {label: this.$t('common.Login' /* Login */), href: '/login'},
+                    {label: this.$t('common.Panel' /* ChangePassword */), href: '/panel'},
+                    {label: this.$t('common.ChangePassword' /* ChangePassword */), href: '/changePassword'},
                 ];
             },
             addressDisabled() {
@@ -130,20 +116,19 @@
 
                 this.isLoading = true;
 
-                axios.get(`http://localhost:8081/users/login`, {
+                axios.patch(`http://localhost:8081/users/changePassword`, formData, {
                     headers: {
-                        'Authorization': `Basic ${btoa(formData.email + ":" + formData.password)}`
+                        'Authorization': `Basic ${Vue.$cookies.get('authorizationKey')}`
                     }
                 }).then(() => {
                     setTimeout(() => {
                         this.isLoading = false;
                         addNotification({
-                            title: 'Login successful!',
+                            title: 'Password successfully reset!',
                             text: '',
                         } as INotification);
 
-                        this.$cookies.set("authorizationKey", btoa(formData.email + ":" + formData.password), "1d");
-                        this.$cookies.set("authorizationEmail", formData.email, "1d");
+                        this.$cookies.set("authorizationKey", btoa(Vue.$cookies.get('authorizationEmail') + ":" + formData.password), "1d");
                         this.$router.push({name: 'panel'});
                     }, 1000);
                 }).catch(error => {
@@ -158,10 +143,10 @@
             },
         },
         beforeCreate() {
-            registerModule('login', LoginModule);
+            registerModule('changePassword', ChangePasswordModule);
         },
         prefetch: (options: IPreLoad) => {
-            registerModule('login', LoginModule);
+            registerModule('changePassword', ChangePasswordModule);
 
             return Promise.resolve();
         },
@@ -174,7 +159,7 @@
 <style lang="scss" module>
 	@import "~@/app/shared/design-system";
 
-	.login {
+	.changePassword {
 		margin-top: $nav-bar-height;
 		min-height: 500px;
 	}

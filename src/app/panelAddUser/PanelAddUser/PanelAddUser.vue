@@ -1,14 +1,27 @@
 <template>
-	<div :class="$style.register">
+	<div :class="$style.panelAddUser">
 		<vue-grid>
 			<vue-breadcrumb :items="breadCrumbItems"></vue-breadcrumb>
 
 			<vue-grid-row>
 				<vue-grid-item fill>
-					<vue-headline level="1">Register</vue-headline>
-					<br/>
+					<vue-headline level="1">Add user</vue-headline>
+
+					<br>
+				</vue-grid-item>
+			</vue-grid-row>
+
+			<vue-grid-row>
+				<vue-grid-item fill>
 					<br/>
 					<form :class="$style.formExample" @submit.prevent="onSubmit">
+						<vue-grid-row>
+							<vue-grid-item>
+								<b>Info:</b>
+
+								<br><br>
+							</vue-grid-item>
+						</vue-grid-row>
 						<vue-grid-row>
 							<vue-grid-item>
 								<vue-input
@@ -18,6 +31,7 @@
 										placeholder="First Name"
 										validation="required"
 										v-model="form.firstName"
+										:error-message="$t('The first name can not be empty')"
 								/>
 							</vue-grid-item>
 							<vue-grid-item>
@@ -28,10 +42,11 @@
 										placeholder="Last Name"
 										validation="required"
 										v-model="form.lastName"
+										:error-message="$t('The last name can not be empty')"
 								/>
 							</vue-grid-item>
 						</vue-grid-row>
-
+						<br><br>
 						<vue-grid-row>
 							<vue-grid-item>
 								<vue-input
@@ -39,86 +54,77 @@
 										id="email"
 										required
 										type="email"
-										placeholder="E-mail"
+										:placeholder="$t('email')"
 										validation="required|email"
 										v-model="form.email"
 										:error-message="$t('components.formExample.email.error' /* Wrong email */)"
 								/>
 							</vue-grid-item>
-						</vue-grid-row>
-
-						<vue-grid-row>
 							<vue-grid-item>
 								<vue-input
-										name="password"
-										id="password"
+										name="mobilePhone"
+										id="mobilePhone"
 										required
-										placeholder="Password"
+										type="mobilePhone"
+										placeholder="Mobile phone"
 										validation="required"
-										v-model="form.password"
-										type="password"
-										:error-message="$t('components.formExample.password.error' /* Wrong email */)"
+										v-model="form.mobilePhone"
+										:error-message="$t('The phone can not be empty')"
 								/>
 							</vue-grid-item>
 							<vue-grid-item>
 								<vue-input
-										name="phonenumber"
-										id="phonenumber"
+										name="role"
+										id="role"
 										required
-										placeholder="Phone number"
-										v-model="form.phonenumber"
-										validation="required|integer"
-										:error-message="$t('components.formExample.phonenumber.error' /* Please enter a Number */)"
-								/>
-							</vue-grid-item>
-						</vue-grid-row>
-
-						<vue-grid-row>
-							<vue-grid-item>
-								<vue-checkbox
-										name="acceptTerms"
-										id="acceptTerms"
-										v-model="form.acceptTerms"
-										label="I accept the terms"
+										type="role"
+										placeholder="Role"
 										validation="required"
-										required
+										v-model="form.role"
+										error-message="Choose role between CUSTOMER or EMPLOYEE"
 								/>
 							</vue-grid-item>
 						</vue-grid-row>
 
 						<br/>
 						<vue-button color="primary" :disabled="isSubmitDisabled" :loading="isLoading">Save</vue-button>
+						<br/><br/><br/>
 					</form>
 				</vue-grid-item>
 			</vue-grid-row>
-
 		</vue-grid>
 	</div>
 </template>
 
 <script lang="ts">
+    import Vue from 'vue';
     import {registerModule} from '@/app/store';
-    import {addNotification, INotification} from '@components/VueNotificationStack/utils';
     import {IPreLoad} from '@/server/isomorphic';
     import VueGrid from '@/app/shared/components/VueGrid/VueGrid.vue';
     import VueBreadcrumb from '@components/VueBreadcrumb/VueBreadcrumb.vue';
     import VueGridRow from '@/app/shared/components/VueGridRow/VueGridRow.vue';
     import VueGridItem from '@/app/shared/components/VueGridItem/VueGridItem.vue';
     import VueButton from '@/app/shared/components/VueButton/VueButton.vue';
-    import VueInput from '@components/VueInput/VueInput.vue';
-    import VueSelect from '@components/VueSelect/VueSelect.vue';
-    import VueCheckbox from '@components/VueCheckbox/VueCheckbox.vue';
     import VueHeadline from '@/app/shared/components/VueHeadline/VueHeadline.vue';
-    import {RegisterModule} from '../module';
-    import axios from 'axios'
+    import VueInput from '@components/VueInput/VueInput.vue';
+    import VueTextarea from '@components/VueTextarea/VueTextarea.vue';
+    import VueSelect from '@components/VueSelect/VueSelect.vue';
+    import VueDatePicker from '@components/VueDatePicker/VueDatePicker.vue';
+    import VueCheckbox from '@components/VueCheckbox/VueCheckbox.vue';
+    import {PanelAddUserModule} from '../module';
+    import {addNotification, INotification} from '@components/VueNotificationStack/utils';
+    import axios from 'axios';
+    import VueCookies from 'vue-cookies'
+    import {router} from "@/app/router";
+
+    Vue.use(VueCookies);
 
     export default {
         $_veeValidate: {
             validator: 'new' as 'new',
         },
-        name: 'Register',
         metaInfo: {
-            title: 'Register',
+            title: 'PanelAddUser',
         },
         components: {
             VueGrid,
@@ -129,17 +135,18 @@
             VueCheckbox,
             VueSelect,
             VueInput,
+            VueTextarea,
+            VueDatePicker,
             VueHeadline,
         },
         data(): any {
             return {
                 form: {
-                    firstName: '',
-                    lastName: '',
-                    email: '',
-                    password: '',
-                    phonenumber: '',
-                    acceptTerms: false,
+                    firstName: null,
+                    lastName:  null,
+                    email:  null,
+                    mobilePhone:  null,
+                    role: null,
                 },
                 isLoading: false,
             };
@@ -148,7 +155,8 @@
             breadCrumbItems() {
                 return [
                     {label: this.$t('common.home' /* Home */), href: '/'},
-                    {label: this.$t('common.Register' /* Register */), href: '/register'},
+                    {label: this.$t('common.Panel' /* Panel */), href: '/panel'},
+                    {label: this.$t('common.PanelAddUser' /* PanelAddUser */), href: '/panel-add-user'},
                 ];
             },
             addressDisabled() {
@@ -172,25 +180,49 @@
                 return this.hasErrors || this.hasEmptyFields;
             },
         },
+        mounted() {
+
+            axios.get(`http://localhost:8081/users/login`, {
+                headers: {
+                    'Authorization': `Basic ${Vue.$cookies.get('authorizationKey')}`
+                }
+            }).then(response => {
+                let accountType = response.data.role
+
+                if (accountType == 'CUSTOMER') {
+                    router.replace('/');
+                }
+
+            }).catch(function () {
+                addNotification({
+                    title: 'You\'re not logged!',
+                    text: 'Please Log in to access this panel',
+                } as INotification);
+
+                router.replace('/');
+            });
+
+        },
         methods: {
             onSubmit() {
-                let formData = JSON.parse(JSON.stringify(this.form))
+                let formData = JSON.parse(JSON.stringify(this.form));
 
                 this.isLoading = true;
 
-                axios.post('http://localhost:8081/users/register', formData, {
+                axios.post('http://localhost:8081/users/', formData, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*',
-                        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"
+                        'Authorization': `Basic ${Vue.$cookies.get('authorizationKey')}`
                     }
                 }).then(response => {
                     setTimeout(() => {
                         this.isLoading = false;
                         addNotification({
-                            title: 'Account has been created!',
-                            text: 'Now please login',
+                            title: 'User has been created!',
+                            text: '',
                         } as INotification);
+
+                        router.replace('/user');
                     }, 1000);
                 }).catch(error => {
                     setTimeout(() => {
@@ -204,15 +236,15 @@
             },
         },
         beforeCreate() {
-            registerModule('register', RegisterModule);
-        },
-        prefetch: (options: IPreLoad) => {
-            registerModule('register', RegisterModule);
-
-            return Promise.resolve();
+            registerModule('panelAddUser', PanelAddUserModule);
         },
         beforeMount() {
 
+        },
+        prefetch: (options: IPreLoad) => {
+            registerModule('panelAddUser', PanelAddUserModule);
+
+            return Promise.resolve();
         },
     };
 </script>
@@ -220,8 +252,38 @@
 <style lang="scss" module>
 	@import "~@/app/shared/design-system";
 
-	.register {
+	.panelAddUser {
 		margin-top: $nav-bar-height;
 		min-height: 500px;
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+
+			tr {
+				width: 100%;
+
+				&:nth-child(even) {
+					background-color: #f2f2f2;
+				}
+
+				&:hover {
+					background-color: #ddd;
+				}
+
+				td, th {
+					border: 1px solid #ddd;
+					padding: 8px;
+				}
+
+				th {
+					padding-top: 12px;
+					padding-bottom: 12px;
+					text-align: left;
+					background-color: #f43b6c;
+					color: white;
+				}
+			}
+		}
 	}
 </style>

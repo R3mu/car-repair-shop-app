@@ -1,53 +1,53 @@
-import { createLocalVue, mount } from '@vue/test-utils';
+import {createLocalVue, mount} from '@vue/test-utils';
 import Stage from './Stage.vue';
-import { i18n } from '../../../shared/plugins/i18n/i18n';
+import {i18n} from '../../../shared/plugins/i18n/i18n';
 
 const localVue = createLocalVue();
 
 describe('Stage.vue', () => {
-  test('renders component', () => {
-    (window as any).HTMLCanvasElement.prototype.getContext = jest.fn();
+    test('renders component', () => {
+        (window as any).HTMLCanvasElement.prototype.getContext = jest.fn();
 
-    const wrapper = mount(Stage, {
-      localVue,
-      i18n,
-      propsData: {
-        disableParticles: true,
-      },
+        const wrapper = mount(Stage, {
+            localVue,
+            i18n,
+            propsData: {
+                disableParticles: true,
+            },
+        });
+
+        expect(wrapper.find('h1').text()).toBe('Car repair shop');
+
+        (wrapper as any).vm.$refs.stage.getClientRects = () => {
+            return {
+                length: 1,
+                item() {
+                    return {
+                        width: 100,
+                        height: 100,
+                    };
+                },
+            };
+        };
+
+        (wrapper as any).vm.handleResize();
     });
 
-    expect(wrapper.find('h1').text()).toBe('vuesion');
+    test('adds and removes resize listeners', () => {
+        window.addEventListener = jest.fn();
+        window.removeEventListener = jest.fn();
 
-    (wrapper as any).vm.$refs.stage.getClientRects = () => {
-      return {
-        length: 1,
-        item() {
-          return {
-            width: 100,
-            height: 100,
-          };
-        },
-      };
-    };
+        const wrapper = mount(Stage, {
+            localVue,
+            i18n,
+            propsData: {
+                disableParticles: false,
+            },
+        });
 
-    (wrapper as any).vm.handleResize();
-  });
+        wrapper.destroy();
 
-  test('adds and removes resize listeners', () => {
-    window.addEventListener = jest.fn();
-    window.removeEventListener = jest.fn();
-
-    const wrapper = mount(Stage, {
-      localVue,
-      i18n,
-      propsData: {
-        disableParticles: false,
-      },
+        expect(window.addEventListener).toBeCalled();
+        expect(window.removeEventListener).toBeCalled();
     });
-
-    wrapper.destroy();
-
-    expect(window.addEventListener).toBeCalled();
-    expect(window.removeEventListener).toBeCalled();
-  });
 });
